@@ -16,7 +16,7 @@ def ParseArgs():
     parser = argparse.ArgumentParser()
     parser.add_argument('-test', action='store_true', default=False,
                     dest='test',
-                    help='Decide se il run è di test')
+                    help='Decide se il run Ã¨ di test')
     parser.add_argument('-url', action='store', default='',
                     dest='testurl',
                     help="Esamina solo l'url")
