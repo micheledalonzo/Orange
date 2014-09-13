@@ -59,7 +59,7 @@ def RestartPaginate():
     try:        
         
         gL.cSql.execute("SELECT * from QRestart")   # rileggo tutti i record della tabella pages che non sono stati completati e li processo nuovamente
-        check = gL.cSql.fetchall()   # è il record con la data di start maggiore
+        check = gL.cSql.fetchall()   # Ã¨ il record con la data di start maggiore
         if not check:
             pass
         else:
