@@ -86,7 +86,7 @@ def RunIdCreate():
 def PagesCreate(source, assettype, country, starturl, pageurl):
     try:
         if pageurl == None or pageurl == '':
-            pageurl = starturl    # se c'è gia resetto le date
+            pageurl = starturl    # se c'Ã¨ gia resetto le date
         a = gL.cSql.execute("Update Pages set Start = ?, End = 0 where source = ? and assettype = ? and country = ? and starturl = ? and pageurl = ?", \
                                     (gL.SetNow(), source, assettype, country, starturl, pageurl))
         if a.rowcount == 0:
@@ -375,7 +375,7 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
             gL.cSql.execute("Select * from Asset where GooglePid = ?", ([GooglePid]))
             CurAsset = gL.cSql.fetchone()
        
-        if CurAsset:   # se è gia' presente lo aggiorno
+        if CurAsset:   # se Ã¨ gia' presente lo aggiorno
             Asset = int(CurAsset['asset'])       
             if name != CurAsset['name'] or NameSimple != CurAsset['namesimple'] or AAsset != CurAsset['aasset']:
                 gL.cSql.execute("Update Asset set Name=?, NameSimple=?, NameSimplified=?, AAsset=?, Updated=? where Asset=?", (name, NameSimple, NameSimplified, AAsset, gL.SetNow(), Asset))
@@ -512,7 +512,7 @@ def sql_dump_Assetmatch():
 
         now = gL.SetNow()
         # dump della tabella in memoria su db
-        # dalla tabella assetmach mantengo solo i record che a parità di chiave hanno punteggio più alto
+        # dalla tabella assetmach mantengo solo i record che a paritÃ  di chiave hanno punteggio piÃ¹ alto
         sql = "SELECT * from assetmatch order BY asset, gblratio"
         gL.cLite.execute(sql)
         cur = gL.cLite.fetchall()
