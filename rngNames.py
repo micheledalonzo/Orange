@@ -1,5 +1,5 @@
 # -*- coding: cp1252 -*-.
-import rangGbl as gL
+import rngGbl as gL
 import phonenumbers
 #import difflib
 from fuzzywuzzy import fuzz

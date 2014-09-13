@@ -38,8 +38,7 @@ import sys
 import locale
 # import jabba_webkit as jw
 from urllib.parse import urlparse
-import rangGbl as gL
-#import rangParse
+import rngGbl as gL
 work_queue = collections.deque()
 
 def RestartParse():

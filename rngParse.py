@@ -13,13 +13,12 @@ import locale
 import random
 # import jabba_webkit as jw
 from urllib.parse import urlparse
-import rangGbl as gL
+import rngGbl as gL
 import requests
 import re
 import json
 import logging
 from collections import namedtuple
-#from rangDb import dbAssetReview
 import difflib
 
 # override del loggin di requests

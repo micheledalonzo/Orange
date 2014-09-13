@@ -1,10 +1,10 @@
 # -*- coding: cp1252 -*-.
 
-import rangGbl as gL
-import rangDb
+import rngGbl as gL
+import rngDb
 import pypyodbc
 import sqlite3
-import rangMain
+import rngMain
 
 u = []
 url1 = 'http://www.tripadvisor.it/Restaurant_Review-g2232879-d2222903-Reviews-Pizzeria_da_Libero-Busso_Province_of_Campobasso_Molise.html'
@@ -26,9 +26,9 @@ if url5 != '':
     u.append(url5)
 
 name = "Pizzeria da Libero"
-gL.Dsn ="rangTest"
+gL.Dsn =gL.DsnTest
 if not gL.MySql:
-    gL.MySql = pypyodbc.connect('DSN=rangTest')
+    gL.MySql = pypyodbc.connect(gL.DsnTest)
     gL.cSql = gL.MySql.cursor()
     
 if not gL.SqLite:
@@ -58,7 +58,7 @@ for i in u:
             
     gL.N_Ass = gL.N_Ass + 1              
     asseturl = i 
-    rc = rangMain.RunInit()
+    rc = rngMain.RunInit()
     # parse delle singole pagine degli asset
     Asset = gL.ParseContent(country, assettype, source, starturl, asseturl, name)                                                  
     if Asset:  # se tutto ok

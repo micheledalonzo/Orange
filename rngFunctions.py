@@ -6,7 +6,7 @@ import datetime
 from pygeocoder import Geocoder
 from pygeolib import GeocoderError
 import re
-import rangGbl as gL
+import Gbl as gL
 import phonenumbers
 import inspect
 import urllib

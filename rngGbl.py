@@ -1,9 +1,9 @@
 # -*- coding: cp1252 -*-.
 import logging
-from rangDb import *
-from rangFunctions import *
-from rangNames import *
-from rangParse import *
+from rngDb import *
+from rngFunctions import *
+from rngNames import *
+from rngParse import *
 import difflib
 import pypyodbc
 import datetime
@@ -35,8 +35,8 @@ RunDate         = SetNow()
 GmapNumcalls    = 0
 count           = 0
 i               = 0
-DsnProd         = 'DSN=rang'
-DsnTest         = 'DSN=rangTest'
+DsnProd         = 'DSN=Orange'
+DsnTest         = 'DSN=OrangeTest'
 Dsn             = ''
 testurl         = ''
 sourcebaseurl   = ""
@@ -89,9 +89,9 @@ def SetLogger(RunId, restart):
  
     # create error file handler and set level to error
     if restart:
-        handler = logging.FileHandler("C:\\Orango\\Log\\"+str(RunId)+'.err','a', encoding=None, delay="true")
+        handler = logging.FileHandler("C:\\Orange\\Log\\"+str(RunId)+'.err','a', encoding=None, delay="true")
     else:
-        handler = logging.FileHandler("C:\\Orango\\Log\\"+str(RunId)+'.err','w', encoding=None, delay="true")
+        handler = logging.FileHandler("C:\\Orange\\Log\\"+str(RunId)+'.err','w', encoding=None, delay="true")
     handler.setLevel(logging.ERROR)
     formatter = logging.Formatter('[%(levelname)-8s] [%(asctime)s] [%(message)s]', "%d-%m %H:%M:%S")
     handler.setFormatter(formatter)
@@ -99,9 +99,9 @@ def SetLogger(RunId, restart):
  
     # create debug file handler and set level to debug
     if restart:
-        handler = logging.FileHandler("C:\\Orango\\Log\\"+str(RunId)+".log","w")
+        handler = logging.FileHandler("C:\\Orange\\Log\\"+str(RunId)+".log","w")
     else:
-        handler = logging.FileHandler("C:\\Orango\\Log\\"+str(RunId)+".log","a")
+        handler = logging.FileHandler("C:\\Orange\\Log\\"+str(RunId)+".log","a")
     handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('[%(levelname)-8s] [%(asctime)s] [%(message)s]', "%d-%m %H:%M:%S")
     handler.setFormatter(formatter)
