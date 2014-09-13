@@ -91,7 +91,7 @@ def ParseAsset(country, assettype, source, starturl, pageurl, asseturl, name):
     Asset = gL.ParseContent(country, assettype, source, starturl, asseturl, name)                                                                      
     if Asset:  # se tutto ok
         gL.cSql.commit()
-        AssetMatch, AssetRef = gL.StdAsset(Asset)   # controllo se esiste gi‡ un asset simile
+        AssetMatch, AssetRef = gL.StdAsset(Asset)   # controllo se esiste gi√† un asset simile
         if AssetMatch is False: # is evita che 0 sia interpretato come false
             gL.log(gL.WARNING, "StdAsset ha resituito False", asseturl)
             return True
@@ -126,7 +126,7 @@ def Parse():
             name     = row['nome']
             country  = row['country']
             source = row['source']
-            #if gL.testrun:      # se Ë un giro di test, esamino solo url indicato
+            #if gL.testrun:      # se √® un giro di test, esamino solo url indicato
             #    if asseturl != gL.testurl:
             #        continue
             msg ="%s - %s" % ("PARSE", asseturl)
