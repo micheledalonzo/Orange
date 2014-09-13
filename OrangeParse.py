@@ -13,7 +13,7 @@ import locale
 import random
 # import jabba_webkit as jw
 from urllib.parse import urlparse
-import rngGbl as gL
+import OrangeGbl as gL
 import requests
 import re
 import json

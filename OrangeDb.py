@@ -6,7 +6,7 @@
 # tutti gli accessi SQL 
 import sqlite3
 import pypyodbc
-import rngGbl as gL
+import OrangeGbl as gL
 
 def OpenConnectionMySql(dsn):
     if not gL.MySql:

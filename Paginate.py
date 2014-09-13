@@ -14,7 +14,7 @@ import sys
 import locale
 # import jabba_webkit as jw
 from urllib.parse import urlparse
-import rngGbl as gL
+import OrangeGbl as gL
 work_queue = collections.deque()
    
 

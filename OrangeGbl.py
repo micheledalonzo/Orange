@@ -1,9 +1,9 @@
 # -*- coding: cp1252 -*-.
 import logging
-from rngDb import *
-from rngFunctions import *
+from OrangeDb import *
+from OrangeFunctions import *
 from rngNames import *
-from rngParse import *
+from OrangeParse import *
 import difflib
 import pypyodbc
 import datetime

@@ -1,7 +1,7 @@
 # -*- coding: cp1252 -*-.
 
-import rngGbl as gL
-import rngDb
+import OrangeGbl as gL
+import OrangeDb
 import pypyodbc
 import sqlite3
 import rngMain
