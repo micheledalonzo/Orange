@@ -59,9 +59,9 @@ preposizioni  = ["il","lo","l'","la","i","gli","le", "di","del","dello","dell'",
 pronomi       = ["io", "me", "mi", "tu", "te", "ti","egli","ella","lui","lei","lo","la","esso","essa","esso","essa","gli",\
                  "le","ne","noi","ci","voi","vi","essi","esse","loro","li","le","essi","esse","ne","ne","quale", "che", "quali", "cui"]
 punteggiatura = [".", ",", ";", ":", "?", "!", "?!", "...", "\"", "'", "<", ">", "-", "(", ")", "[", "]", "*"]
-congiunzioni =  ["&","pure", "inoltre", "ancora", "altresì", "ma", "però", "pure", "mentre", "anzi", "invece", "tuttavia", "dunque", "però",\
-                 "quindi", "ondeperciò", "pertanto", "ebbene", "laondee", "pure", "né","inoltre", "ancora", "neppure", "neanche", "nemmeno", \
-                 "e", "né", "o", "come", "così","sia", "che","quanto", "quale", "difatti", "cioè", "invero", "ossiaossia", "ovvero", "oppure"]
+congiunzioni =  ["&","pure", "inoltre", "ancora", "altresÃ¬", "ma", "perÃ²", "pure", "mentre", "anzi", "invece", "tuttavia", "dunque", "perÃ²",\
+                 "quindi", "ondeperciÃ²", "pertanto", "ebbene", "laondee", "pure", "nÃ©","inoltre", "ancora", "neppure", "neanche", "nemmeno", \
+                 "e", "nÃ©", "o", "come", "cosÃ¬","sia", "che","quanto", "quale", "difatti", "cioÃ¨", "invero", "ossiaossia", "ovvero", "oppure"]
    
 INFO     = logging.INFO
 CRITICAL = logging.CRITICAL
