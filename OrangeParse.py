@@ -152,7 +152,7 @@ def NextpageDuespaghi(url, page):
             return url_a, page
 
     except Exception as err:
-        url_a = "http://" + o.hostname + o.path + "?pag=2&ord=relevance&dir=desc"  # se non trovo il numero pagina vuol dire che è la prima pagina, 
+        url_a = "http://" + o.hostname + o.path + "?pag=2&ord=relevance&dir=desc"  # se non trovo il numero pagina vuol dire che Ã¨ la prima pagina, 
         # controlla che esista
         newpage = ReadPage(url_a)
         if newpage is not None:
@@ -188,11 +188,11 @@ def NextpageViamichelin(url, page):
                     return False, ''
 
         except Exception as err:
-            url_a = "http://" + o.hostname + o.path + "?page=2"  # se non trovo il numero pagina vuol dire che è la prima pagina, 
+            url_a = "http://" + o.hostname + o.path + "?page=2"  # se non trovo il numero pagina vuol dire che Ã¨ la prima pagina, 
             # controlla che esista
             newpage = ReadPage(url_a)
             if newpage is not None:
-                test = newpage.xpath('//div[@id="noResult"]')  # controllo che la seconda esista con del contenuto (questo è il messaggio "No result"
+                test = newpage.xpath('//div[@id="noResult"]')  # controllo che la seconda esista con del contenuto (questo Ã¨ il messaggio "No result"
                 if len(test) == 0:
                     return url_a, newpage
             else:
@@ -212,7 +212,7 @@ def NextpageQristoranti(url, page):
         # get la prossima pagina lista e inseriscila nella coda di lavoro e nella
         # tabella starturl
         # per tutti i link rel next
-        pagact = page.xpath('//span[@class="inactive"]/text()')   # pagina attuale, se zero non c'è paginazione,
+        pagact = page.xpath('//span[@class="inactive"]/text()')   # pagina attuale, se zero non c'Ã¨ paginazione,
         if len(pagact) == 0:
             return False, ''
         curpa = int(pagact[0])
@@ -338,9 +338,9 @@ def ParseTripadvisor(country, url, name, Asset):
             cont = cont + 1
         if gL.currency == "EUR":
             if PriceFrom != 0:
-                PriceFrom = PriceFrom.replace(u'\xa0€', u'')
+                PriceFrom = PriceFrom.replace(u'\xa0Â€', u'')
             if PriceTo != 0:
-                PriceTo = PriceTo.replace(u'\xa0€', u'')
+                PriceTo = PriceTo.replace(u'\xa0Â€', u'')
 
         PriceList = [['PriceCurr', gL.currency],
                      ['PriceFrom', PriceFrom],
@@ -428,7 +428,7 @@ def ParseGooglePlaces(assettype, name, street, zip, city, country, address, AAss
             gL.log(gL.WARNING, "GooglePlaces Status " + data['status'])
             return False
 
-        # se ci sono più elementi ritornati scelgo quello che meglio matcha ---------------------
+        # se ci sono piÃ¹ elementi ritornati scelgo quello che meglio matcha ---------------------
         chk = []   
         namepeso = 1.5
         streetpeso = 1     
@@ -464,7 +464,7 @@ def ParseGooglePlaces(assettype, name, street, zip, city, country, address, AAss
         if 'reference' in a:
             ref = a['reference']
         if 'price_level' in a:
-            prz = a['price_level'] # 0 — Free 1 — Inexpensive 2 — Moderate 3 — Expensive 4 — Very Expensive
+            prz = a['price_level'] # 0 Â— Free 1 Â— Inexpensive 2 Â— Moderate 3 Â— Expensive 4 Â— Very Expensive
         if 'rating' in a:
             rat = a['rating']        
         if 'formatted_address' in a:
@@ -728,7 +728,7 @@ def ParseDuespaghi(country, url, name, Asset):
         price = content.xpath('//*[@itemprop="priceRange"]/text()')
         if price:
             a = price[0]
-            PriceAvg = a.replace('€', '')
+            PriceAvg = a.replace('Â€', '')
             PriceList = [['PriceCur', gL.currency],
                             ['PriceAvg', PriceAvg]]
             rc = gL.dbAssetPrice(Asset, PriceList, gL.currency)
@@ -840,7 +840,7 @@ def ParseViamichelin(country, url, name, Asset):
             punt = 3
         if len(lev2) > 0:
             punt = 2
-        if len(lev1) > 0:    # bib gourmand locali ottimo rapporto qualità/prezzo
+        if len(lev1) > 0:    # bib gourmand locali ottimo rapporto qualitÃ /prezzo
             punt = 1
         if punt > 0:
             r.append((nreview, punt))
