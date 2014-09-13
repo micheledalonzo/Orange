@@ -212,9 +212,9 @@ def StdAsset(Asset):
         if not asset:
             gL.log("ERROR", "Asset non trovato in tabella")
             return False
-        if asset['aasset'] != 0:   # se Ë gi‡ stato battezzato non lo esamino di nuovo
+        if asset['aasset'] != 0:   # se √® gi√† stato battezzato non lo esamino di nuovo
             return Asset, asset['aasset']
-        # tutti i record dello stesso tipo e paese ma differenti source, e che hanno gi‡ un asset di riferimento (aasset)
+        # tutti i record dello stesso tipo e paese ma differenti source, e che hanno gi√† un asset di riferimento (aasset)
         gL.cSql.execute("select AAsset, Asset, Country, Name, NameSimple, AddrStreet, AddrCity, AddrZIP, AddrCounty, AddrPhone, AddrWebsite, AddrRegion, FormattedAddress from qaddress where \
                                 Asset <> ? and source <> ? and country = ? and assettype = ? and AAsset <> 0", (Asset, asset['source'], asset['country'], asset['assettype']))
         rows  = gL.cSql.fetchall()     
@@ -227,7 +227,7 @@ def StdAsset(Asset):
                 return rows[j]['asset'], rows[j]['aasset']
             if asset['addrphone'] and rows[j]['addrphone'] and (asset['addrphone'] == rows[j]['addrphone']):
                 return rows[j]['asset'], rows[j]['aasset']
-            if asset['addrcity'] and asset['addrroute']:   # se c'Ë almeno la strada e la citt‡
+            if asset['addrcity'] and asset['addrroute']:   # se c'√® almeno la strada e la citt√†
                 if asset['formattedaddress'] and rows[j]['formattedaddress'] and (asset['formattedaddress'] == rows[j]['formattedaddress']):
                     return rows[j]['asset'], rows[j]['aasset']
             # se non hanno lo stesso paese, regione, provincia, salto
