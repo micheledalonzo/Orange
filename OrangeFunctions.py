@@ -6,7 +6,7 @@ import datetime
 from pygeocoder import Geocoder
 from pygeolib import GeocoderError
 import re
-import Gbl as gL
+import OrangeGbl as gL
 import phonenumbers
 import inspect
 import urllib
@@ -16,10 +16,13 @@ def ParseArgs():
     parser = argparse.ArgumentParser()
     parser.add_argument('-test', action='store_true', default=False,
                     dest='test',
-                    help='Decide se il run è di test')
+                    help='Decide se il run e di test')
     parser.add_argument('-url', action='store', default='',
                     dest='testurl',
                     help="Esamina solo l'url")
+    parser.add_argument('-debug', action='store_true', default='',
+                    dest='debug',
+                    help="Dump tabelle interne su Db")
 
     args = parser.parse_args()
     if args.test:
@@ -32,6 +35,11 @@ def ParseArgs():
         print("RUN EFFETTIVO")
     if args.testurl:
         gL.testurl = args.testurl
+    if args.debug:
+        gL.debug = True
+    
+    gL.Args = args
+
     return True
 
 def Restart():
@@ -82,7 +90,7 @@ def StdCar(stringa):
         clean = stringa[0]
     else:
         clean = stringa
-    CaratteriVietati = ['#', '(', ')', '/', '.', '-', ';',  '"']
+    CaratteriVietati = ['#', '(', ')', '/', '.', '-', ';', '"', '|']
     for ch in CaratteriVietati:
         if ch in clean:
             clean = clean.replace(ch, "")
@@ -90,8 +98,7 @@ def StdCar(stringa):
     stringa = clean.strip()
     return stringa
 
-def StdName(stringa):
-    
+def StdName(stringa):    
     stringa = gL.StdCar(stringa)    
     return stringa.title()
 

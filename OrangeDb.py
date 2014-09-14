@@ -40,8 +40,6 @@ def LoadProxyList():
         gL.log(gL.ERROR, err)
         return False
 
-
-
 def CloseConnectionSqlite():
     if gL.SqLite:
         gL.SqLite.close()
@@ -242,11 +240,11 @@ def dbQueueStatus(startend, country, assettype, source, starturl, pageurl, asset
 
 def dbAssetOpening(Asset, orario):
     try:
-        gL.cSql.execute("Delete * from dbAssetOpening where Asset = ? ", ([Asset]))
+        gL.cSql.execute("Delete * from AssetOpening where Asset = ? ", ([Asset]))
         for j in orario:
             x = j[1][:2]+":"+j[1][2:]
             y = j[2][:2]+":"+j[2][2:]
-            gL.cSql.execute("Insert into dbAssetOpening(Asset, WeekDay, OpenFrom, OpenTo) Values (?, ?, ?, ?)", \
+            gL.cSql.execute("Insert into AssetOpening(Asset, WeekDay, OpenFrom, OpenTo) Values (?, ?, ?, ?)", \
                     (Asset, j[0], x, y))   
         return True
 
@@ -359,11 +357,49 @@ def dbSqlSaveContent(url, content):
  
     return True
 
+def DumpTabratio(tabratio):
+    if len(tabratio) == 0:
+        return
+    for item in tabratio:\
+        #tabratio.append((gblratio, asset['name'], rows[j]['name'], rows[j]['asset'], rows[j]['aasset'], nameratio, streetratio, cityratio, zipratio, webratio, phoneratio ))                  
+        gL.cSql.execute("Delete from Debug_TabRatio where Asset = ?", ([item[1]])) 
+        break
+    for item in tabratio:        
+        gL.cSql.execute( "Insert into Debug_TabRatio(Asset, Assetref, AAssetref, Name, Nameref, Gblratio, Nameratio, Streetratio, Cityratio, Zipratio, Webratio, Phoneratio, Nameratio_ratio, Nameratio_partial, Nameratio_set) \
+                          Values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", \
+                         (item[1], item[4],item[5],item[2],item[3],item[0],item[6],item[7],item[8],item[9],item[10],item[11],item[12],item[13],item[14]))                            
+
+    return
+
+def DumpNames(Asset, name, NameSimple):
+    try:
+        gL.cSql.execute("Delete from Debug_Names where Asset = ?", ([Asset]))             
+        gL.cSql.execute("Insert into Debug_Names(Asset, Name, Newname) \
+                         Values (?, ?, ?)", \
+                       ( Asset, name, NameSimple))
+    except Exception as err:
+        gL.log(gL.ERROR, err)
+        return False
+
+    return True
+
+
+def DumpGoogleResults(Asset, name, indirizzo, chk):
+    if len(chk) == 0:
+        return
+    for item in chk:       
+        gL.cSql.execute("Delete from Debug_GoogleResults where Asset = ?", ([Asset]))             
+        break
+    for item in chk:
+        gL.cSql.execute("Insert into Debug_GoogleResults(Asset, AssetName, AssetAddress, GblRatio, Nome, Address, NameRatio, StreetRatio) \
+                         Values (?, ?, ?, ?, ?, ?, ?, ?)",        \
+                       ( Asset, name, indirizzo, item[0], item[2], item[3], item[4], item[5]))      
+    return True
 
 def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
     
     try:    
-        msg = "%s %s(%s) - %s" % ('Asset:', gL.N_Ass, gL.T_Ass, name.encode('utf-8'))
+        msg = "%s %s(%s) - %s - %s" % ('Asset:', gL.N_Ass, gL.T_Ass, name.encode('utf-8'), url.encode('utf-8'))
         gL.log(gL.INFO, msg)
 
         NameSimple, NameSimplified, tag, cuc = gL.ManageName(name, country, assettype)
@@ -375,7 +411,7 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
             gL.cSql.execute("Select * from Asset where GooglePid = ?", ([GooglePid]))
             CurAsset = gL.cSql.fetchone()
        
-        if CurAsset:   # se è gia' presente lo aggiorno
+        if CurAsset:   # se e' gia' presente lo aggiorno
             Asset = int(CurAsset['asset'])       
             if name != CurAsset['name'] or NameSimple != CurAsset['namesimple'] or AAsset != CurAsset['aasset']:
                 gL.cSql.execute("Update Asset set Name=?, NameSimple=?, NameSimplified=?, AAsset=?, Updated=? where Asset=?", (name, NameSimple, NameSimplified, AAsset, gL.SetNow(), Asset))
@@ -387,6 +423,9 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
             a = gL.cSql.fetchone()
             Asset = int(a[0])
     
+        if gL.debug and NameSimplified:            
+            gL.DumpNames(Asset, name, NameSimple)
+           
         rc = dbAssetTag(Asset, tag, "Tipologia")
         rc = dbAssetTag(Asset, cuc, "Cucina")
         return Asset
@@ -502,30 +541,6 @@ def dbAAsset(Asset, AssetMatch, AssetRef):
         
         return AAsset
 
-    except Exception as err:
-        gL.log(gL.ERROR, err)
-        return False
-
-
-def sql_dump_Assetmatch():
-    try:
-
-        now = gL.SetNow()
-        # dump della tabella in memoria su db
-        # dalla tabella assetmach mantengo solo i record che a parità di chiave hanno punteggio più alto
-        sql = "SELECT * from assetmatch order BY asset, gblratio"
-        gL.cLite.execute(sql)
-        cur = gL.cLite.fetchall()
-        for a in cur:
-            asset = a[0]
-            cfrasset = a[4]
-            nameratio = a[8]
-            cityratio = a[9]
-            streetratio = a[10]
-            gblratio = a[11]
-            gL.cSql.execute("insert into assetmatch  (insertdate, asset, cfrasset, nameratio, streetratio, cityratio, gblratio) values(?, ?, ?, ?, ?, ?, ?)",\
-                                                    (gL.SetNow(), asset, cfrasset, nameratio, streetratio, cityratio, gblratio))
-        return True
     except Exception as err:
         gL.log(gL.ERROR, err)
         return False

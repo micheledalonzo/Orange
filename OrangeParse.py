@@ -391,7 +391,7 @@ def ParseGooglePlacesMain(Asset, AAsset):
         addrcounty  = row['addrcounty']
             
         
-        gAsset = gL.ParseGooglePlaces(assettype, name, gL.xstr(addrstreet), gL.xstr(addrzip), gL.xstr(addrcity), gL.xstr(country), gL.xstr(address), AAsset)
+        gAsset = gL.ParseGooglePlaces(Asset, assettype, name, gL.xstr(addrstreet), gL.xstr(addrzip), gL.xstr(addrcity), gL.xstr(country), gL.xstr(address), AAsset )
             
         return gAsset
 
@@ -400,7 +400,7 @@ def ParseGooglePlacesMain(Asset, AAsset):
         gL.log(gL.ERROR, err)
         return False
 
-def ParseGooglePlaces(assettype, name, street, zip, city, country, address, AAsset):
+def ParseGooglePlaces(Asset, assettype, name, street, zip, city, country, address, AAsset):
     if address != '':
         indirizzo = address
     else:
@@ -436,7 +436,8 @@ def ParseGooglePlaces(assettype, name, street, zip, city, country, address, AAss
             for idx, test in enumerate(data['results']):
                 if 'formatted_address' in test:
                     adr = test['formatted_address']
-                nam = test['name']    
+                #nam =             
+                nam = gL.StdName(test['name'])    
                 nameratio = streetratio = 0
                 nameratio = difflib.SequenceMatcher(None, a = name, b = nam).ratio()
                 streetratio = difflib.SequenceMatcher(None, a = indirizzo, b = adr).ratio()    
@@ -444,7 +445,8 @@ def ParseGooglePlaces(assettype, name, street, zip, city, country, address, AAss
                 chk.append((gblratio, idx, nam, adr, nameratio, streetratio))      # nome, indirizzo, ratio del nome, ratio dell'indirizzo
             #chk.sort(reverse=True) 
             chk.sort(reverse=True, key=lambda tup: tup[0])  
-            gL.log(gL.WARNING, "Google Result Match " + str(chk[0][0]))
+            if gL.debug:            
+                gL.DumpGoogleResults(Asset, name, indirizzo, chk)
             if chk[0][0] < 0.8:  #global ratio
                 idx = 0
             else:
@@ -522,7 +524,8 @@ def ParseGooglePlaces(assettype, name, street, zip, city, country, address, AAss
             url = ''
         
         # ---------------------------- INSERISCO L'ASSET
-        Asset = gL.dbAsset(country, assettype, gL.GoogleSource, nam, url, AAsset, pid)  # inserisco l'asset
+        AddrCity=AddrCounty=AddrZIP=AddrPhone=AddrPhone1=AddrWebsite=AddrLat=AddrLong=AddrRegion=FormattedAddress=AddrCountry=Address=''
+        Asset = gL.dbAsset(country, assettype, gL.GoogleSource, nam, url, AAsset, pid)  # inserisco l'asset        
         if Asset == 0:
             return Asset
         rc = gL.dbAssetTag(Asset, tag, "Tipologia")
@@ -540,6 +543,8 @@ def ParseGooglePlaces(assettype, name, street, zip, city, country, address, AAss
                             AddrRegion = component['long_name']     
                 if a[0] == "administrative_area_level_2":             
                             AddrCounty = component['short_name']     
+                if a[0] == "administrative_area_level_3":             
+                            AddrCity = component['long_name']     
                 if a[0] == "street_number":             
                             AddrNumber = component['long_name']     
                 if a[0] == "postal_code":             
@@ -562,7 +567,6 @@ def ParseGooglePlaces(assettype, name, street, zip, city, country, address, AAss
             AddrLat  = d['geometry']['location']['lat']
             AddrLong = d['geometry']['location']['lng']        
 
-        AddrCity=AddrCounty=AddrZIP=AddrPhone=AddrPhone1=AddrWebsite=AddrLat=AddrLong=AddrRegion=FormattedAddress=AddrCountry=Address=''
         AddrValidated = gL.NO
         FormattedAddress = d['formatted_address']
         AddrList = {'AddrStreet': AddrStreet,

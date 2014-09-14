@@ -2,7 +2,7 @@
 import logging
 from OrangeDb import *
 from OrangeFunctions import *
-from rngNames import *
+from OrangeNames import *
 from OrangeParse import *
 import difflib
 import pypyodbc
@@ -24,6 +24,7 @@ GoogleSource    = 5 # la codifica fissa (in tabella)
 N_Ass           = 0
 T_Ass           = 0
 testrun         = False
+debug           = False
 Frasi           = []
 Drive           = []
 Parole          = []

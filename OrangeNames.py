@@ -141,12 +141,10 @@ def NameSimplify(lang, assettype, nome):
             newname = nome
 
         if nome != newname:
-            msg = "[NOME MODIFICATO] [" + nome + "] [" + newname + "]"
-            gL.log(gL.WARNING, msg)
+            #msg = "[NOME MODIFICATO] [" + nome + "] [" + newname + "]"
             chg = True            
     
     except Exception as err:
-
         gL.log(gL.ERROR, nome)
         gL.log(gL.ERROR, err)
 
@@ -212,7 +210,7 @@ def StdAsset(Asset):
         if not asset:
             gL.log("ERROR", "Asset non trovato in tabella")
             return False
-        if asset['aasset'] != 0:   # se è già stato battezzato non lo esamino di nuovo
+        if asset['aasset'] != 0:   # se e' gia'� stato battezzato non lo esamino di nuovo
             return Asset, asset['aasset']
         # tutti i record dello stesso tipo e paese ma differenti source, e che hanno già un asset di riferimento (aasset)
         gL.cSql.execute("select AAsset, Asset, Country, Name, NameSimple, AddrStreet, AddrCity, AddrZIP, AddrCounty, AddrPhone, AddrWebsite, AddrRegion, FormattedAddress from qaddress where \
@@ -227,7 +225,7 @@ def StdAsset(Asset):
                 return rows[j]['asset'], rows[j]['aasset']
             if asset['addrphone'] and rows[j]['addrphone'] and (asset['addrphone'] == rows[j]['addrphone']):
                 return rows[j]['asset'], rows[j]['aasset']
-            if asset['addrcity'] and asset['addrroute']:   # se c'è almeno la strada e la città
+            if asset['addrcity'] and asset['addrroute']:   # se c'e' almeno la strada e la citta', se l'indirizzo � uguale sono uguali
                 if asset['formattedaddress'] and rows[j]['formattedaddress'] and (asset['formattedaddress'] == rows[j]['formattedaddress']):
                     return rows[j]['asset'], rows[j]['aasset']
             # se non hanno lo stesso paese, regione, provincia, salto
@@ -240,19 +238,27 @@ def StdAsset(Asset):
             streetratio=streetratio_set=streetratio_partial=streetratio_ratio=0
             cityratio_ratio=cityratio_set=cityratio_partial=cityratio=0             
             webratio=phoneratio=zipratio=0
+            # se c'e' uso il nome parziale
             name = cfrname = city = cfrcity = street = cfrstreet = zip = cfrzip = ''
             gblratio = 0; quanti = 0; 
-            if asset['name'] and rows[j]['name'] :
-                name = asset['name'].title()
-                cfrname = rows[j]['name'].title()                
-                nameratio_ratio = fuzz.ratio(name, cfrname)
-                nameratio_partial = fuzz.partial_ratio(name, cfrname)
-                nameratio_set = fuzz.token_set_ratio(name, cfrname)
-                nameratio = nameratio_set+ nameratio_partial + nameratio_ratio
-                if nameratio_partial > 70:
-                    quanti = quanti + 1
-                else:
-                    continue
+            A = asset['namesimplified']
+            B = rows[j]['namesimplified']
+            if A: 
+                name = A.title(); 
+            else: 
+                name = asset['name'].title(); 
+            if B: 
+                cfrname = B.title()
+            else: 
+                cfrname = rows[j]['name'].title()            
+            nameratio_ratio = fuzz.ratio(name, cfrname)
+            nameratio_partial = fuzz.partial_ratio(name, cfrname)
+            nameratio_set = fuzz.token_set_ratio(name, cfrname)
+            nameratio = nameratio_set+ nameratio_partial + nameratio_ratio
+            if nameratio_partial > 70:
+                quanti = quanti + 1
+            else:
+                continue
                 #print(name+","+cfrname+","+str(nameratio)+","+str(fuzz.ratio(name, cfrname))+","+str(fuzz.partial_ratio(name, cfrname))+","+str(fuzz.token_sort_ratio(name, cfrname))+","+str(fuzz.token_set_ratio(name, cfrname)))
             if asset['addrcity'] and rows[j]['addrcity'] :
                 city = asset['addrcity'].title() 
@@ -300,7 +306,7 @@ def StdAsset(Asset):
                     quanti = quanti + 1
                 else:
                     zipratio = 0
-            if nameratio > 200:
+            if nameratio > 100:  # da modificare quando ho capito come fare
                 # peso i match 0,6 sufficiente, 
                 namepeso = 2
                 streetpeso = 1.5
@@ -315,12 +321,14 @@ def StdAsset(Asset):
                              (webratio      * webpeso) +              \
                              (phoneratio    * phonepeso))             \
                              /
-                             (quanti)  )            
-                tabratio.append((gblratio, asset['name'], rows[j]['name'], rows[j]['asset'], rows[j]['aasset'], nameratio, streetratio, cityratio, zipratio, webratio, phoneratio ))                  
+                             (quanti)  )                     
+                tabratio.append((gblratio, asset['asset'], asset['name'], rows[j]['name'], rows[j]['asset'], rows[j]['aasset'], nameratio, streetratio, cityratio, zipratio, webratio, phoneratio, nameratio_ratio, nameratio_partial, nameratio_set))
             
         if len(tabratio) > 0:
-            tabratio.sort(reverse=True, key=lambda tup: tup[0])  
-            if tabratio[0][0] > 0.7:   # global                
+            tabratio.sort(reverse=True, key=lambda tup: tup[0])
+            if gL.debug:
+                gL.DumpTabratio(tabratio)
+            if tabratio[0][0] > 400:   # global                
                 msg = ("[ASSET MATCH] [%s-%s] [%s-%s] [%s]" % (tabratio[0][3], tabratio[0][1], tabratio[0][4], tabratio[0][2], tabratio[0][0]))
                 gL.log(gL.WARNING, msg)
                 return tabratio[0][3], tabratio[0][4]  # Asset, AAsset

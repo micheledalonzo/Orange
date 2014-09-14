@@ -58,45 +58,45 @@ def BuildAssetList(country, assettype, source, starturl, pageurl, runlogid):
 def RestartPaginate():
     try:        
         
-        gL.cSql.execute("SELECT * from QRestart")   # rileggo tutti i record della tabella pages che non sono stati completati e li processo nuovamente
-        check = gL.cSql.fetchall()   # è il record con la data di start maggiore
-        if not check:
-            pass
-        else:
-            for log in check:
-                gL.assetbaseurl = log['drivebaseurl']  
-                language        = log['countrylanguage']  
-                gL.currency     = log['countrycurr']
-                gL.sourcebaseurl= log['sourcebaseurl']    
-                source          = log['source']
-                sourcename      = log['sourcename']                
-                assettypename   = log['assettypename']                
-                assettype       = log['assettype']
-                country         = log['country']
-                starturl        = log['starturl']
-                pageurl         = log['ultimodipageurl']        
-                SetLocaleString = log['setlocalestring']        
-                # gestione della lingua per l'interpretazione delle date
-                if not SetLocaleString:
-                    gL.log(gL.ERROR, "SetLocaleString non settata in QDrive")
-                    return False
-                locale.setlocale(locale.LC_TIME, SetLocaleString)  
+        gL.cSql.execute("SELECT * from QPagesRestart")   # rileggo tutti i record della tabella pages che non sono stati completati e li processo nuovamente
+        check = gL.cSql.fetchall() 
+        gL.T_Ass = len(check)
+        msg=('RUN %s: RESTART PARSING, %s Assets IN QUEUE' % (gL.RunId, gL.T_Ass))                
+        gL.log(gL.INFO, msg)
+        for log in check:
+            gL.assetbaseurl = log['drivebaseurl']  
+            language        = log['countrylanguage']  
+            gL.currency     = log['countrycurr']
+            gL.sourcebaseurl= log['sourcebaseurl']    
+            source          = log['source']
+            sourcename      = log['sourcename']                
+            assettypename   = log['assettypename']                
+            assettype       = log['assettype']
+            country         = log['country']
+            starturl        = log['starturl']
+            pageurl         = log['ultimodipageurl']        
+            SetLocaleString = log['setlocalestring']        
+            # gestione della lingua per l'interpretazione delle date
+            if not SetLocaleString:
+                gL.log(gL.ERROR, "SetLocaleString non settata in QDrive")
+                return False
+            locale.setlocale(locale.LC_TIME, SetLocaleString)  
               
-                # stampo i parametri di esecuzione
-                msg=('RESTART PAGINAZIONE: RUN: %s SOURCE: %s ASSET: %s COUNTRY: %s REFRESH: BOH RESTART: %s' % (gL.RunId, sourcename, assettypename, country, gL.restart))
-                gL.log(gL.INFO, msg)
+            # stampo i parametri di esecuzione
+            msg=('RESTART PAGINAZIONE: RUN: %s SOURCE: %s ASSET: %s COUNTRY: %s REFRESH: BOH RESTART: %s' % (gL.RunId, sourcename, assettypename, country, gL.restart))
+            gL.log(gL.INFO, msg)
 
-                page = gL.ReadPage(pageurl)  # rileggo l'ultima pagina con data di start massima
-                if page is not None:
-                    newpageurl, newpage = gL.ParseNextPage(source, assettype, country, pageurl, page)  # leggo se esiste la prossima pagina 
-                    if newpageurl:
-                        # ---------------- (ri)costruisco la coda
-                        msg=('RUN: %s: PAGINAZIONE' % (gL.RunId))
-                        gL.log(gL.INFO, msg)
-                        rc = BuildAssetList(country, assettype, source, starturl, pageurl, gL.RunId)      # ricostruisco la coda              
-                        if not rc:
-                            gL.log(gL.WARNING, "PAGINATE KO")
-                            return False
+            page = gL.ReadPage(pageurl)  # rileggo l'ultima pagina con data di start massima
+            if page is not None:
+                newpageurl, newpage = gL.ParseNextPage(source, assettype, country, pageurl, page)  # leggo se esiste la prossima pagina 
+                if newpageurl:
+                    # ---------------- (ri)costruisco la coda
+                    msg=('RUN: %s: PAGINAZIONE' % (gL.RunId))
+                    gL.log(gL.INFO, msg)
+                    rc = BuildAssetList(country, assettype, source, starturl, pageurl, gL.RunId)      # ricostruisco la coda              
+                    if not rc:
+                        gL.log(gL.WARNING, "PAGINATE KO")
+                        return False
         
         return True
 
@@ -104,7 +104,7 @@ def RestartPaginate():
         gL.log(gL.ERROR, err)
         return False
 
-def Paginate():
+def NormalPaginate():
     try:    
         for drive in gL.Drive:              # inserisco gli starturl nel run
             country = drive['country']  
@@ -166,17 +166,17 @@ def Main():
         #---------------------------------------------- M A I N ------------------------------------------------
         # apri connessione e cursori, carica keywords in memoria
         gL.SqLite, gL.C = gL.OpenConnectionSqlite()
-        gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)   
+        gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)           
         gL.restart == False
-        
         runid = gL.Restart()
-        if  gL.restart == True:
+        rc = gL.SetLogger(gL.RunId, gL.restart)     
+        gL.log(gL.INFO, gL.Args)       
+        if  gL.restart == True:            
             gL.RunId = runid    
             rc = gL.RunInit()
             if not rc:
                 gL.log(gL.ERROR, "RunInit errato")                    
                 return False
-            rc = gL.SetLogger(gL.RunId, gL.restart)            
             rc = RestartPaginate()         # -----------------RESTART----------------------------------
             if not rc:   
                 return False
@@ -205,7 +205,7 @@ def Main():
                 rc = gL.RunInit()    
                 if not rc:
                     gL.log(gL.ERROR, "RunInit errato")        
-                rc = Paginate()              # -------------------RUN------------------------------------
+                rc = NormalPaginate()              # -------------------RUN------------------------------------
                 if not rc:   
                     gL.log(gL.ERROR, "Run terminato in modo errato")        
                 else:
