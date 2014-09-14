@@ -402,8 +402,6 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
         msg = "%s %s(%s) - %s - %s" % ('Asset:', gL.N_Ass, gL.T_Ass, name.encode('utf-8'), url.encode('utf-8'))
         gL.log(gL.INFO, msg)
 
-        NameSimple, NameSimplified, tag, cuc = gL.ManageName(name, country, assettype)
-
         if GooglePid == '':
             gL.cSql.execute("Select * from Asset where Url = ?", ([url]))
             CurAsset = gL.cSql.fetchone()
@@ -413,9 +411,13 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
        
         if CurAsset:   # se e' gia' presente lo aggiorno
             Asset = int(CurAsset['asset'])       
+            chk = int(CurAsset['namesimplified'])       # controllo se devo riprovare a semplificare il nome
+            if chk == gL.NO:
+                NameSimple, NameSimplified, tag, cuc = gL.ManageName(name, country, assettype)
             if name != CurAsset['name'] or NameSimple != CurAsset['namesimple'] or AAsset != CurAsset['aasset']:
                 gL.cSql.execute("Update Asset set Name=?, NameSimple=?, NameSimplified=?, AAsset=?, Updated=? where Asset=?", (name, NameSimple, NameSimplified, AAsset, gL.SetNow(), Asset))
         else:          # se no lo inserisco
+            NameSimple, NameSimplified, tag, cuc = gL.ManageName(name, country, assettype)
             gL.cSql.execute( "Insert into Asset(Source, AssetType, Country, Url, Name, NameSimple, NameSimplified, Created, Updated, Active, GooglePid, AAsset) \
                               Values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", \
                             ( source, assettype, country, url, name, NameSimple, NameSimplified, gL.RunDate, gL.SetNow(), gL.YES, GooglePid, AAsset))

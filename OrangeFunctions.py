@@ -90,7 +90,7 @@ def StdCar(stringa):
         clean = stringa[0]
     else:
         clean = stringa
-    CaratteriVietati = ['#', '(', ')', '/', '.', '-', ';', '"', '|']
+    CaratteriVietati = ['#', '(', ')', '/', '.', '-', ';', '"', ',', '|']
     for ch in CaratteriVietati:
         if ch in clean:
             clean = clean.replace(ch, "")

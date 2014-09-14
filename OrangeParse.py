@@ -388,8 +388,7 @@ def ParseGooglePlacesMain(Asset, AAsset):
         addrstreet  = row['addrstreet']
         addrcity    = row['addrcity']
         addrzip     = row['addrzip']
-        addrcounty  = row['addrcounty']
-            
+        addrcounty  = row['addrcounty']            
         
         gAsset = gL.ParseGooglePlaces(Asset, assettype, name, gL.xstr(addrstreet), gL.xstr(addrzip), gL.xstr(addrcity), gL.xstr(country), gL.xstr(address), AAsset )
             
@@ -466,7 +465,7 @@ def ParseGooglePlaces(Asset, assettype, name, street, zip, city, country, addres
         if 'reference' in a:
             ref = a['reference']
         if 'price_level' in a:
-            prz = a['price_level'] # 0 Â— Free 1 Â— Inexpensive 2 Â— Moderate 3 Â— Expensive 4 Â— Very Expensive
+            prz = a['price_level'] # 0 — Free 1 — Inexpensive 2 — Moderate 3 — Expensive 4 — Very Expensive
         if 'rating' in a:
             rat = a['rating']        
         if 'formatted_address' in a:
