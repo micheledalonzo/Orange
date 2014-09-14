@@ -401,7 +401,8 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
     try:    
         msg = "%s %s(%s) - %s - %s" % ('Asset:', gL.N_Ass, gL.T_Ass, name.encode('utf-8'), url.encode('utf-8'))
         gL.log(gL.INFO, msg)
-
+        NameSimple = ''
+        NameSimplified = False
         if GooglePid == '':
             gL.cSql.execute("Select * from Asset where Url = ?", ([url]))
             CurAsset = gL.cSql.fetchone()
