@@ -216,3 +216,6 @@ $RECYCLE.BIN/
 *.mdb
 *.pyproj
 Orange.sln
+*.pyc
+*.pyproj
+*.pyproj
