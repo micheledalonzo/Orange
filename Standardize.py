@@ -37,6 +37,8 @@ try:
         gL.log(gL.INFO, "Asset " + str(Asset) + " AssetMatch " + str(AssetMatch) + " AssetRef " + str(AssetRef))
         AAsset = gL.dbAAsset(Asset, AssetMatch, AssetRef)   
         # creo o aggiorno il record in AAsset a partire da SourceAsseId corrente
+        gAsset = gL.ParseGooglePlacesMain(Asset, AAsset)
+        gL.cSql.commit()
     sys.exit(0)
 
 except Exception as err:

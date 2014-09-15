@@ -57,8 +57,8 @@ def ParseAsset(country, assettype, source, starturl, pageurl, asseturl, name):
         gL.dbQueueStatus("END", country, assettype, source, starturl, pageurl, asseturl) # scrivo nella coda che ho finito
         gL.cSql.commit()
         # per ogni asset una call a Google Places
-        gAsset = gL.ParseGooglePlacesMain(Asset, AAsset)
-        gL.cSql.commit()
+        #gAsset = gL.ParseGooglePlacesMain(Asset, AAsset)
+        #gL.cSql.commit()
     return True
 
 def RestartParse():
