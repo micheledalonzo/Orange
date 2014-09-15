@@ -51,7 +51,6 @@ for i in u:
     country = 'ITA'
     source = 1
     assettype = 1
-    refresh = True
     gL.currency = 'EUR'
     starturl = 'test'     
     pageurl = starturl            

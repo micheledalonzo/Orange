@@ -454,22 +454,26 @@ def dbLastReviewDate(Asset, LastReviewDate):
         return False
 
 
-def dbCreateMemTableWasset():
+def dbCreateMemTableMemAsset():
     try:
         cmd_create_table = """CREATE TABLE if not exists
-                    wasset (
-                            country     STRING,
-                            asset       INTEGER,
-                            assettype   INTEGER,
-                            assetid     INTEGER,
-                            name        STRING,
-                            source      INTEGER,
-                            street      STRING,
-                            city        STRING,
-                            zip         STRING,
-                            county      STRING,
-                            namesimple  STRING,
-                            namesimplified  INTEGER
+                    MemAsset (
+                                Asset            STRING,
+                                Country          STRING,
+                                Aasset           INTEGER,
+                                Name             STRING,
+                                Source           INTEGER,
+                                NameSimple       STRING,
+                                Assettype        INTEGER,
+                                AddrStreet       STRING,
+                                AddrCity         STRING,
+                                AddrZIP          STRING,
+                                AddrCountry      STRING,
+                                AddrPhone        STRING,
+                                AddrWebsite      STRING,
+                                AddrRegion       STRING,
+                                FormattedAddress STRING,
+                                Namesimplified   INTEGER
                             );"""
         gL.SqLite.executescript(cmd_create_table)
         return True
@@ -548,35 +552,40 @@ def dbAAsset(Asset, AssetMatch, AssetRef):
         gL.log(gL.ERROR, err)
         return False
 
-def sql_CopyAssetInMemory(country=None, source=None, assettype=None):
+def CopyAssetInMemory():
     
-    if source is not None and country is not None and assettype is not None:
-        sql = "Select * from Asset where country = '" + country + "' and  source = " + str(source) + " and assettype = " + str(assettype) + " order by Name"
-    else:
-        sql = "Select * from Asset order by Name"
-    
-    gL.cSql.execute(sql)
-    wassets = gL.cSql.fetchall()
-    # ratio = 0
+    try:
+        gL.log(gL.INFO, "Loading assets....")
+        gL.cSql.execute("Select * from QAddress order by Name")
+        memassets = gL.cSql.fetchall()
+        count = 0
+        for asset in memassets:
+            count = count + 1
+            AAsset      = asset['aasset']
+            Asset       = asset['asset']
+            Country     = asset['country']
+            Source      = asset['source']
+            Name        = asset['name']
+            NameSimple  = asset['namesimple']
+            AddrStreet  = asset['addrstreet']
+            AddrCity    = asset['addrcity']
+            AddrZIP     = asset['addrzip']
+            AddrCountry = asset['addrcountry']
+            AddrPhone   = asset['addrphone']
+            AddrWebsite = asset['addrwebsite']
+            Assettype   = asset['assettype']
+            AddrRegion  = asset['addrregion']
+            FormattedAddress =  asset['formattedaddress']
+            gL.cLite.execute("insert into MemAsset \
+                            (aasset, asset, assettype, country, name, namesimple, addrstreet, addrcity, addrzip, addrcountry, addrphone, addrwebsite, addrregion, formattedaddress, source) \
+                                            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            (AAsset, Asset, Assettype, Country, Name, NameSimple, AddrStreet, AddrCity, AddrZIP, AddrCountry, AddrPhone, AddrWebsite, AddrRegion, FormattedAddress, Source))
+        gL.log(gL.INFO, str(count) + " asset in memory")
+        return True
+    except Exception as err:
+        gL.log(gL.ERROR, err)
+        return False
 
-    gL.count = 0
-    for wasset in wassets:
-        country = wasset['country']
-        asset = wasset['asset']
-        assettype = wasset['assettype']
-        assetid = wasset['assetid']
-        name = wasset['name']
-        source = wasset['source']
-        street = wasset['addrstreet']
-        city = wasset['addrcity']
-        wzip = wasset['addrzip']
-        county = wasset['county']
-        namesimple = wasset['namesimple']
-        namesimply = wasset['namesimplified']
-        gL.cLite.execute("insert into wasset (country, asset, assettype, assetid, name, source, street, city, zip, county, namesimple, namesimplified) \
-                                        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                      (country, asset, assettype, assetid, name, source, street, city, wzip, county, namesimple, namesimply))
-    return
 
 def sql_CopyKeywordsInMemory():
     

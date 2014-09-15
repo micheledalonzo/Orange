@@ -248,7 +248,6 @@ def CercaFrase(frase, stringa, operatore, replacew):
 
 
 def xstr(s):
-    
     if s is None:
         return ''
     return str(s)

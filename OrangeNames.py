@@ -151,9 +151,8 @@ def NameSimplify(lang, assettype, nome):
     return chg, newname, typ, cuc
 
 
-
 def AllNameSimplify():    
-    sql = "SELECT * from wasset where NameSimplified = " + str(gL.NO) + " order BY name "
+    sql = "SELECT * from MemAsset where NameSimplified = " + str(gL.NO) + " order BY name "
     gL.cLite.execute(sql)
     assets = gL.cLite.fetchall() 
     if not assets:
@@ -200,38 +199,56 @@ def ManageName(name, country, assettype):
 
     return NameSimple, NameSimplified, tag, cuc
 
-def StdAsset(Asset):
+def StdAsset(Asset, Mode):
 
     try:
         tabratio = []
         # il record corrente
         gL.cSql.execute("select Asset, Assettype, Source, AAsset, Country, Name, NameSimple, AddrStreet, AddrCity, AddrZIP, AddrCounty, AddrPhone, AddrWebsite, AddrRegion, FormattedAddress from qaddress where asset =  ?", ([Asset]))
-        asset = gL.cSql.fetchone() 
-        if not asset:
+        Curasset = gL.cSql.fetchone() 
+        if not Curasset:
             gL.log("ERROR", "Asset non trovato in tabella")
             return False
-        if asset['aasset'] != 0:   # se e' gia'† stato battezzato non lo esamino di nuovo
-            return Asset, asset['aasset']
-        # tutti i record dello stesso tipo e paese ma differenti source, e che hanno gi√† un asset di riferimento (aasset)
-        gL.cSql.execute("select AAsset, Asset, Country, Name, NameSimple, AddrStreet, AddrCity, AddrZIP, AddrCounty, AddrPhone, AddrWebsite, AddrRegion, FormattedAddress from qaddress where \
-                                Asset <> ? and source <> ? and country = ? and assettype = ? and AAsset <> 0", (Asset, asset['source'], asset['country'], asset['assettype']))
-        rows  = gL.cSql.fetchall()     
+        if Mode == "NEW":
+            if Curasset['aasset'] != 0:   # se e' gia'† stato battezzato non lo esamino di nuovo
+                return Asset, Curasset['aasset']
+            # tutti i record dello stesso tipo e paese ma differenti source, e che hanno gia† un asset di riferimento (aasset)
+        gL.cLite.execute("select * from MemAsset where \
+                          Asset <> ? and source <> ? and country = ? and assettype = ? and AAsset <> 0 order by name", (Asset, Curasset['source'], Curasset['country'], Curasset['assettype']))
+        rows  = gL.cLite.fetchall()     
         if len(rows) == 0:   # non ce ne sono
             return 0,0   #inserisco l'asset corrente
 
         for j in range (0, len(rows)):
+            asset           = str(rows[j][0])
+            country         = str(rows[j][1])
+            aasset          = str(rows[j][2])
+            name            = str(rows[j][3])
+            source          = str(rows[j][4])
+            namesimple      = str(rows[j][5])
+            assettype       = str(rows[j][6])
+            addrstreet      = str(rows[j][7])
+            addrcity        = str(rows[j][8])
+            addrzip         = str(rows[j][9])  # viene caricata come intero ?
+            addrcountry     = str(rows[j][10])
+            addrphone       = str(rows[j][11])
+            addrwebsite     = str(rows[j][12])
+            addrregion      = str(rows[j][13])
+            formattedaddress= str(rows[j][14])
+            namesimplified  = str(rows[j][15])
+
             # se hanno esattamente stesso sito web o telefono o indirizzo sono uguali
-            if asset['addrwebsite'] and rows[j]['addrwebsite'] and (asset['addrwebsite'] == rows[j]['addrwebsite']):
-                return rows[j]['asset'], rows[j]['aasset']
-            if asset['addrphone'] and rows[j]['addrphone'] and (asset['addrphone'] == rows[j]['addrphone']):
-                return rows[j]['asset'], rows[j]['aasset']
-            if asset['addrcity'] and asset['addrroute']:   # se c'e' almeno la strada e la citta', se l'indirizzo Ë uguale sono uguali
-                if asset['formattedaddress'] and rows[j]['formattedaddress'] and (asset['formattedaddress'] == rows[j]['formattedaddress']):
-                    return rows[j]['asset'], rows[j]['aasset']
+            if Curasset['addrwebsite'] and addrwebsite and (Curasset['addrwebsite'] == addrwebsite):
+                return asset, aasset
+            if Curasset['addrphone'] and addrphone and (Curasset['addrphone'] == addrphone):
+                return asset, aasset
+            if Curasset['addrcity'] and Curasset['addrroute']:   # se c'e' almeno la strada e la citta', se l'indirizzo Ë uguale sono uguali
+                if Curasset['formattedaddress'] and formattedaddress and (Curasset['formattedaddress'] == formattedaddress):
+                    return asset, aasset
             # se non hanno lo stesso paese, regione, provincia, salto
-            if asset['country'] and rows[j]['country'] and (asset['country'] != rows[j]['country']):
+            if Curasset['country'] and country and (Curasset['country'] != country):
                 continue
-            if asset['addrregion'] and rows[j]['addrregion'] and (asset['addrregion'] != rows[j]['addrregion']):
+            if Curasset['addrregion'] and addrregion and (Curasset['addrregion'] != addrregion):
                 continue
 
             nameratio=nameratio_ratio=nameratio_set=nameratio_partial=0           
@@ -241,16 +258,16 @@ def StdAsset(Asset):
             # se c'e' uso il nome parziale
             name = cfrname = city = cfrcity = street = cfrstreet = zip = cfrzip = ''
             gblratio = 0; quanti = 0; 
-            A = asset['namesimplified']
-            B = rows[j]['namesimplified']
+            A = Curasset['namesimplified']
+            B = namesimplified
             if A: 
                 name = A.title(); 
             else: 
-                name = asset['name'].title(); 
+                name = Curasset['name'].title(); 
             if B: 
                 cfrname = B.title()
             else: 
-                cfrname = rows[j]['name'].title()            
+                cfrname = name.title()            
             nameratio_ratio = fuzz.ratio(name, cfrname)
             nameratio_partial = fuzz.partial_ratio(name, cfrname)
             nameratio_set = fuzz.token_set_ratio(name, cfrname)
@@ -260,9 +277,9 @@ def StdAsset(Asset):
             else:
                 continue
                 #print(name+","+cfrname+","+str(nameratio)+","+str(fuzz.ratio(name, cfrname))+","+str(fuzz.partial_ratio(name, cfrname))+","+str(fuzz.token_sort_ratio(name, cfrname))+","+str(fuzz.token_set_ratio(name, cfrname)))
-            if asset['addrcity'] and rows[j]['addrcity'] :
-                city = asset['addrcity'].title() 
-                cfrcity = rows[j]['addrcity'].title()
+            if Curasset['addrcity'] and addrcity:
+                city = Curasset['addrcity'].title() 
+                cfrcity = addrcity.title()
                 cityratio_ratio = fuzz.ratio(city, cfrcity)
                 cityratio_partial = fuzz.partial_ratio(city, cfrcity)
                 cityratio_set = fuzz.token_set_ratio(city, cfrcity)
@@ -271,9 +288,9 @@ def StdAsset(Asset):
                     quanti = quanti + 1                
                 else:
                     cityratio = 0
-            if asset['addrstreet'] and rows[j]['addrstreet'] :
-                street = asset['addrstreet'].title()             
-                cfrstreet = rows[j]['addrstreet'].title()                               
+            if Curasset['addrstreet'] and addrstreet:
+                street = Curasset['addrstreet'].title()             
+                cfrstreet = addrstreet.title()                               
                 streetratio_ratio = fuzz.ratio(street, cfrstreet)
                 streetratio_partial = fuzz.partial_ratio(street, cfrstreet)
                 streetratio_set = fuzz.token_set_ratio(street, cfrstreet)
@@ -282,25 +299,25 @@ def StdAsset(Asset):
                     quanti = quanti + 1 
                 else:
                     streetratio = 0 
-            if asset['website'] and rows[j]['website'] :
-                web = asset['website'].title() 
-                cfrweb = rows[j]['website'].title()                
+            if Curasset['website'] and website:
+                web = Curasset['website'].title() 
+                cfrweb = website.title()                
                 webratio = fuzz.ratio(web, cfrweb)
                 if webratio > 90:
                     quanti = quanti + 1
                 else:
                     webratio = 0
-            if asset['addrphone'] and rows[j]['addrphone'] :
-                pho = asset['addrphone'].title() 
-                cfrpho = rows[j]['addrphone'].title()                
+            if Curasset['addrphone'] and addrphone:
+                pho = Curasset['addrphone'].title() 
+                cfrpho = addrphone.title()                
                 phoneratio = fuzz.ratio(pho, cfrpho)
                 if phoneratio > 90:
                     quanti = quanti + 1
                 else:
                     phoneratio = 0
-            if asset['addrzip'] and rows[j]['addrzip'] :
-                zip = rows[j]['addrzip'].title()
-                cfrzip = rows[j]['addrzip'].title()
+            if Curasset['addrzip'] and addrzip:
+                zip = addrzip.title()
+                cfrzip = addrzip.title()
                 zipratio = fuzz.ratio(zip, cfrzip)
                 if zipratio > 90:
                     quanti = quanti + 1
@@ -322,7 +339,7 @@ def StdAsset(Asset):
                              (phoneratio    * phonepeso))             \
                              /
                              (quanti)  )                     
-                tabratio.append((gblratio, asset['asset'], asset['name'], rows[j]['name'], rows[j]['asset'], rows[j]['aasset'], nameratio, streetratio, cityratio, zipratio, webratio, phoneratio, nameratio_ratio, nameratio_partial, nameratio_set))
+                tabratio.append((gblratio, Curasset['asset'], Curasset['name'], name, asset, aasset, nameratio, streetratio, cityratio, zipratio, webratio, phoneratio, nameratio_ratio, nameratio_partial, nameratio_set))
             
         if len(tabratio) > 0:
             tabratio.sort(reverse=True, key=lambda tup: tup[0])
@@ -346,7 +363,7 @@ def NameInit(country=None, source=None, assettype=None):
     gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)
     
     # Create database table in memory
-    gL.dbCreateMemTableWasset()
+    #gL.dbCreateMemTablemem_asset()
     gL.dbCreateMemTableAssetmatch()
     # popola con i dati
     rc = gL.sql_CopyAssetInMemory(country, source, assettype)    

@@ -47,12 +47,13 @@ def ParseAsset(country, assettype, source, starturl, pageurl, asseturl, name):
     Asset = gL.ParseContent(country, assettype, source, starturl, asseturl, name)                                                                      
     if Asset:  # se tutto ok
         gL.cSql.commit()
-        AssetMatch, AssetRef = gL.StdAsset(Asset)   # controllo se esiste gia' un asset simile
-        if AssetMatch is False: # is evita che 0 sia interpretato come false
-            gL.log(gL.WARNING, "StdAsset ha restituito False", asseturl)
-            gL.dbQueueStatus("END", country, assettype, source, starturl, pageurl, asseturl) # scrivo nella coda che ho finito
-            return True
-        AAsset = gL.dbAAsset(Asset, AssetMatch, AssetRef)   # creo il record in Asset a partire da SourceAsseId corrente con riferimento al suo simile oppure lo aggiorno
+        # sposto tutto in una funzione a se stante asincrona
+        #AssetMatch, AssetRef = gL.StdAsset(Asset)   # controllo se esiste gia' un asset simile
+        #if AssetMatch is False: # is evita che 0 sia interpretato come false
+        #    gL.log(gL.WARNING, "StdAsset ha restituito False", asseturl)
+        #    gL.dbQueueStatus("END", country, assettype, source, starturl, pageurl, asseturl) # scrivo nella coda che ho finito
+        #    return True
+        #AAsset = gL.dbAAsset(Asset, AssetMatch, AssetRef)   # creo il record in AAsset a partire da SourceAsseId corrente con riferimento al suo simile oppure lo aggiorno
         gL.dbQueueStatus("END", country, assettype, source, starturl, pageurl, asseturl) # scrivo nella coda che ho finito
         gL.cSql.commit()
         # per ogni asset una call a Google Places

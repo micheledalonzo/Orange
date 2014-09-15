@@ -83,7 +83,7 @@ def RestartPaginate():
             locale.setlocale(locale.LC_TIME, SetLocaleString)  
               
             # stampo i parametri di esecuzione
-            msg=('RESTART PAGINAZIONE: RUN: %s SOURCE: %s ASSET: %s COUNTRY: %s REFRESH: BOH RESTART: %s' % (gL.RunId, sourcename, assettypename, country, gL.restart))
+            msg=('RESTART PAGINAZIONE: RUN: %s SOURCE: %s ASSET: %s COUNTRY: %s RESTART: %s' % (gL.RunId, sourcename, assettypename, country, gL.restart))
             gL.log(gL.INFO, msg)
 
             page = gL.ReadPage(pageurl)  # rileggo l'ultima pagina con data di start massima
@@ -110,7 +110,6 @@ def NormalPaginate():
             country = drive['country']  
             source = drive['source']
             assettype = drive['assettype']
-            refresh = drive['refresh']
             language = drive['countrylanguage']     
             starturl = drive['starturl']     
             pageurl = starturl        
@@ -135,7 +134,6 @@ def NormalPaginate():
             country = drive['country']  # paese
             source = drive['source']
             assettype = drive['assettype']
-            refresh = drive['refresh']
             sourcename = drive['sourcename']
             gL.currency = drive['countrycurr']
             assettypename = drive['assettypename']
@@ -145,7 +143,7 @@ def NormalPaginate():
             pageurl = starturl            
             gL.sourcebaseurl = drive['sourcebaseurl']                        
         
-            msg=('RUN: %s SOURCE: %s ASSET: %s COUNTRY: %s REFRESH: %s STARTURL: %s' % (gL.RunId, sourcename, assettypename, country, refresh, starturl))
+            msg=('RUN: %s SOURCE: %s ASSET: %s COUNTRY: %s STARTURL: %s' % (gL.RunId, sourcename, assettypename, country, starturl))
             gL.log(gL.INFO, msg)
                     # FASE DI PAGINAZIONE
             # ---------------- (ri)costruisco la coda
