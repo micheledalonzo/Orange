@@ -36,7 +36,7 @@ try:
         Asset = row['asset']
         # "ALL" rifai tutti daccapo
         msg=('Asset %s(%s)' % (gL.N_Ass, gL.T_Ass))
-        gL.log(gL.INFO, gL.Args)
+        gL.log(gL.INFO, msg)
         AssetMatch, AssetRef = gL.StdAsset(Asset, "ALL") 
         if AssetMatch is False: # is evita che 0 sia interpretato come false
             gL.log(gL.WARNING, "Asset " + str(Asset) + str(AssetMatch) + str(AssetRef))
