@@ -7,6 +7,7 @@ import OrangeDb
 import sys
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
+import time
 
 try:
     rc = gL.ParseArgs()
@@ -29,6 +30,7 @@ try:
     gL.T_Ass = len(rows)
     msg=('RUN %s: STDIZE %s Assets' % (gL.RunId, gL.T_Ass))
     gL.log(gL.INFO, gL.Args)
+    t1 = time.clock()
     for row in rows:
         gL.N_Ass = gL.N_Ass + 1
         Asset = row['asset']
@@ -44,6 +46,8 @@ try:
         # cerco le info sull'asset in Google        
         #gAsset = gL.ParseGooglePlacesMain(Asset, AAsset)
         gL.cSql.commit()
+    t2 = time.clock()
+    print(round(t2-t1, 3))
     sys.exit(0)
 
 except Exception as err:
