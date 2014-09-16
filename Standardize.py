@@ -20,24 +20,29 @@ try:
         gL.log(gL.ERROR, "SetLogger errato")
      
     gL.log(gL.INFO, gL.Args)
-
-    
+    gL.N_Ass = 0
     # creo la tabella in memoria                
     rc = gL.dbCreateMemTableMemAsset()
     rc = gL.CopyAssetInMemory()
     gL.cSql.execute("Select * from QAddress order by name")
     rows = gL.cSql.fetchall()
+    gL.T_Ass = len(rows)
+    msg=('RUN %s: STDIZE %s Assets' % (gL.RunId, gL.T_Ass))
+    gL.log(gL.INFO, gL.Args)
     for row in rows:
+        gL.N_Ass = gL.N_Ass + 1
         Asset = row['asset']
         # "ALL" rifai tutti daccapo
+        msg=('Asset %s(%s)' % (gL.N_Ass, gL.T_Ass))
+        gL.log(gL.INFO, gL.Args)
         AssetMatch, AssetRef = gL.StdAsset(Asset, "ALL") 
         if AssetMatch is False: # is evita che 0 sia interpretato come false
             gL.log(gL.WARNING, "Asset " + str(Asset) + str(AssetMatch) + str(AssetRef))
             continue
-        gL.log(gL.INFO, "Asset " + str(Asset) + " AssetMatch " + str(AssetMatch) + " AssetRef " + str(AssetRef))
-        AAsset = gL.dbAAsset(Asset, AssetMatch, AssetRef)   
         # creo o aggiorno il record in AAsset a partire da SourceAsseId corrente
-        gAsset = gL.ParseGooglePlacesMain(Asset, AAsset)
+        AAsset = gL.dbAAsset(Asset, AssetMatch, AssetRef)   
+        # cerco le info sull'asset in Google        
+        #gAsset = gL.ParseGooglePlacesMain(Asset, AAsset)
         gL.cSql.commit()
     sys.exit(0)
 
