@@ -4,6 +4,7 @@ import phonenumbers
 #import difflib
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
+import time
 
 # fanne solo limita, di nomi
 limita = 0
@@ -24,7 +25,7 @@ def NameSimplify(lang, assettype, nome):
         if not nome or not lang:
             gL.log(gL.ERROR, "Errore nella chiamata di NameSimplify")
             return chg, '', ''
-
+        nome = gL.StdName(nome)
         # cerco le kwywords da trattare - frasi
         idxlist=[]; newname=""
 
@@ -104,7 +105,7 @@ def NameSimplify(lang, assettype, nome):
                     chgwrd   = True
                
                 if  keyword == y and operatoreW == "Replace":
-                    yy.replace(y, replacew)
+                    yy[idx].replace(y, replacew)
                     if xtyp1 is not None:
                         typ.append(xtyp1)
                     if xtyp2 is not None:
@@ -150,30 +151,14 @@ def NameSimplify(lang, assettype, nome):
 
     return chg, newname, typ, cuc
 
-
-def AllNameSimplify():    
-    sql = "SELECT * from MemAsset where NameSimplified = " + str(gL.NO) + " order BY name "
-    gL.cLite.execute(sql)
-    assets = gL.cLite.fetchall() 
-    if not assets:
-        return False
+def NameReset():
+    try:
+        # per tutte le righe che non hanno il flag DoNotTouch sbianca il simplename e azzera il flag
+        gL.cSql.execute("UPDATE Asset SET NameSimple = '', NameSimplified = ? WHERE NameDoNotTouch = ?", (gL.NO, gL.YES))
+        return True
+    except Exception as err:
+        gL.log(gL.ERROR, err)
     
-    for asset in assets:
-        tag = []
-        asset = asset[1]
-        name = str(asset[4])        
-        city = asset[7]
-        assettype = asset[2]
-        country = asset[0]
-        # reperisco la lingua corrente
-        gL.cSql.execute("select CountryLanguage from Country where country =?", ([country]))
-        w = gL.cSql.fetchone()
-        lang = w['countrylanguage']
-        chg, newname, tag, cuc = NameSimplify(lang, assettype, name)
-        if chg:
-            gL.cSql.execute("Update Asset set NameSimple = ?, NameSimplified = ? where Asset = ?", (newname, gL.YES, asset))
-
-    return True
 
 def ManageName(name, country, assettype):
     # tabella delle lingue per paese
@@ -202,9 +187,10 @@ def ManageName(name, country, assettype):
 def StdAsset(Asset, Mode):
 
     try:
+        t1 = time.clock()
         tabratio = []
         # il record corrente
-        gL.cSql.execute("select Asset, Assettype, Source, AAsset, Country, Name, NameSimple, AddrStreet, AddrCity, AddrZIP, AddrCounty, AddrPhone, AddrWebsite, AddrRegion, FormattedAddress from qaddress where asset =  ?", ([Asset]))
+        gL.cSql.execute("select * from qaddress where asset =  ?", ([Asset]))
         Curasset = gL.cSql.fetchone() 
         if not Curasset:
             gL.log("ERROR", "Asset non trovato in tabella")
@@ -213,13 +199,16 @@ def StdAsset(Asset, Mode):
             if Curasset['aasset'] != 0:   # se e' gia'  stato battezzato non lo esamino di nuovo
                 return Asset, Curasset['aasset']
             # tutti i record dello stesso tipo e paese ma differenti source, e che hanno gia  un asset di riferimento (aasset)
-        gL.cLite.execute("select * from MemAsset where \
-                          Asset <> ? and source <> ? and country = ? and assettype = ? and AAsset <> 0 order by name", (Asset, Curasset['source'], Curasset['country'], Curasset['assettype']))
+        gL.cLite.execute("select * from MemAsset where Asset <> ? and Source <> ? and Country = ? and Assettype = ? and AAsset <> 0", (Asset, Curasset['source'], Curasset['country'], Curasset['assettype']))
         rows  = gL.cLite.fetchall()     
         if len(rows) == 0:   # non ce ne sono
             return 0,0   #inserisco l'asset corrente
 
         for j in range (0, len(rows)):
+
+            name = cfrname = city = cfrcity = street = cfrstreet = zip = cfrzip = ''
+            gblratio = 0; quanti = 0; 
+
             asset           = str(rows[j][0])
             country         = str(rows[j][1])
             aasset          = str(rows[j][2])
@@ -230,7 +219,7 @@ def StdAsset(Asset, Mode):
             addrstreet      = str(rows[j][7])
             addrcity        = str(rows[j][8])
             addrzip         = str(rows[j][9])  # viene caricata come intero ?
-            addrcountry     = str(rows[j][10])
+            addrcounty      = str(rows[j][10])
             addrphone       = str(rows[j][11])
             addrwebsite     = str(rows[j][12])
             addrregion      = str(rows[j][13])
@@ -256,23 +245,19 @@ def StdAsset(Asset, Mode):
             cityratio_ratio=cityratio_set=cityratio_partial=cityratio=0             
             webratio=phoneratio=zipratio=0
             # se c'e' uso il nome parziale
-            name = cfrname = city = cfrcity = street = cfrstreet = zip = cfrzip = ''
-            gblratio = 0; quanti = 0; 
             A = Curasset['namesimplified']
             B = namesimplified
-            if A: 
-                name = A.title(); 
+            if A == gL.YES and B == gL.TRUE: 
+                curname = Curasset['namesimple'].title(); 
+                cfrname = namesimple.title()
             else: 
-                name = Curasset['name'].title(); 
-            if B: 
-                cfrname = B.title()
-            else: 
+                curname = Curasset['name'].title(); 
                 cfrname = name.title()            
-            nameratio_ratio = fuzz.ratio(name, cfrname)
-            nameratio_partial = fuzz.partial_ratio(name, cfrname)
-            nameratio_set = fuzz.token_set_ratio(name, cfrname)
+            nameratio_ratio = fuzz.ratio(curname, cfrname)
+            nameratio_partial = fuzz.partial_ratio(curname, cfrname)
+            nameratio_set = fuzz.token_set_ratio(curname, cfrname)
             nameratio = nameratio_set+ nameratio_partial + nameratio_ratio
-            if nameratio_partial > 70:
+            if nameratio_ratio > 50:
                 quanti = quanti + 1
             else:
                 continue
@@ -284,7 +269,7 @@ def StdAsset(Asset, Mode):
                 cityratio_partial = fuzz.partial_ratio(city, cfrcity)
                 cityratio_set = fuzz.token_set_ratio(city, cfrcity)
                 cityratio = cityratio_set + cityratio_partial + cityratio_ratio
-                if cityratio > 75:
+                if cityratio > 50:
                     quanti = quanti + 1                
                 else:
                     cityratio = 0
@@ -295,7 +280,7 @@ def StdAsset(Asset, Mode):
                 streetratio_partial = fuzz.partial_ratio(street, cfrstreet)
                 streetratio_set = fuzz.token_set_ratio(street, cfrstreet)
                 streetratio = streetratio_set + streetratio_partial + streetratio_ratio
-                if streetratio > 75:
+                if streetratio > 50:
                     quanti = quanti + 1 
                 else:
                     streetratio = 0 
@@ -303,7 +288,7 @@ def StdAsset(Asset, Mode):
                 web = Curasset['website'].title() 
                 cfrweb = website.title()                
                 webratio = fuzz.ratio(web, cfrweb)
-                if webratio > 90:
+                if webratio > 50:
                     quanti = quanti + 1
                 else:
                     webratio = 0
@@ -311,7 +296,7 @@ def StdAsset(Asset, Mode):
                 pho = Curasset['addrphone'].title() 
                 cfrpho = addrphone.title()                
                 phoneratio = fuzz.ratio(pho, cfrpho)
-                if phoneratio > 90:
+                if phoneratio > 50:
                     quanti = quanti + 1
                 else:
                     phoneratio = 0
@@ -319,7 +304,7 @@ def StdAsset(Asset, Mode):
                 zip = addrzip.title()
                 cfrzip = addrzip.title()
                 zipratio = fuzz.ratio(zip, cfrzip)
-                if zipratio > 90:
+                if zipratio > 50:
                     quanti = quanti + 1
                 else:
                     zipratio = 0
@@ -339,7 +324,7 @@ def StdAsset(Asset, Mode):
                              (phoneratio    * phonepeso))             \
                              /
                              (quanti)  )                     
-                tabratio.append((gblratio, Curasset['asset'], Curasset['name'], name, asset, aasset, nameratio, streetratio, cityratio, zipratio, webratio, phoneratio, nameratio_ratio, nameratio_partial, nameratio_set))
+                tabratio.append((round(gblratio,2), Curasset['asset'], curname, cfrname, asset, aasset, round(nameratio,2), round(streetratio,2), round(cityratio,2), round(zipratio,2), round(webratio,2), round(phoneratio,2), round(nameratio_ratio,2), round(nameratio_partial,2), round(nameratio_set,2)))
             
         if len(tabratio) > 0:
             tabratio.sort(reverse=True, key=lambda tup: tup[0])
@@ -348,33 +333,13 @@ def StdAsset(Asset, Mode):
             if tabratio[0][0] > 400:   # global                
                 msg = ("[ASSET MATCH] [%s-%s] [%s-%s] [%s]" % (tabratio[0][3], tabratio[0][1], tabratio[0][4], tabratio[0][2], tabratio[0][0]))
                 gL.log(gL.WARNING, msg)
+                t2 = time.clock()
+                print(round(t2-t1, 3))
                 return tabratio[0][3], tabratio[0][4]  # Asset, AAsset
-
+        t2 = time.clock()
+        print(round(t2-t1, 3))
         return 0,0
 
     except Exception as err:
         gL.log(gL.ERROR, err)
         return False
-
-def NameInit(country=None, source=None, assettype=None):
-    
-    # connect to db e crea il cursore
-    gL.SqLite, gL.C = gL.OpenConnectionSqlite()
-    gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)
-    
-    # Create database table in memory
-    #gL.dbCreateMemTablemem_asset()
-    gL.dbCreateMemTableAssetmatch()
-    # popola con i dati
-    rc = gL.sql_CopyAssetInMemory(country, source, assettype)    
-    rc = gL.dbCreateMemTableKeywords()
-    rc = gL.sql_CopyKeywordsInMemory()
-    return True
-
-if __name__ == "__main__":    
-    rc = NameInit()
-    #rc = gL.StdAsset()
-    rc = gL.cSql.commit()
-    
-    #rc = gL.AllNameSimplify()
-    #rc = gL.cSql.commit()

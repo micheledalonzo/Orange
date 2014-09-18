@@ -427,7 +427,7 @@ def ParseGooglePlaces(Asset, assettype, name, street, zip, city, country, addres
             gL.log(gL.WARNING, "GooglePlaces Status " + data['status'])
             return False
 
-        # se ci sono più elementi ritornati scelgo quello che meglio matcha ---------------------
+        # se ci sono piu' elementi ritornati scelgo quello che meglio matcha ---------------------
         chk = []   
         namepeso = 1.5
         streetpeso = 1     
@@ -459,7 +459,7 @@ def ParseGooglePlaces(Asset, assettype, name, street, zip, city, country, addres
         if 'geometry' in a:
             lat = a['geometry']['location']['lat']
             lng = a['geometry']['location']['lng']
-        nam = a['name']                  
+        nam = a['name'].title()                  
         if 'place_id' in a:
             pid = a['place_id']
         if 'reference' in a:

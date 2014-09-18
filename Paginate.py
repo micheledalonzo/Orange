@@ -167,7 +167,7 @@ def Main():
         gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)           
         gL.restart == False
         runid = gL.Restart()
-        rc = gL.SetLogger(gL.RunId, gL.restart)     
+        rc = gL.SetLogger("PGN", gL.RunId, gL.restart)     
         gL.log(gL.INFO, gL.Args)       
         if  gL.restart == True:            
             gL.RunId = runid    
@@ -196,7 +196,7 @@ def Main():
                 rc = gL.RunIdStatus("START")  
                 if not rc:
                     gL.log(gL.ERROR, "RunId errato")        
-                rc = gL.SetLogger(gL.RunId, gL.restart)
+                rc = gL.SetLogger("PGN", gL.RunId, gL.restart)
                 if not rc:
                     gL.log(gL.ERROR, "SetLogger errato")        
                 gL.log(gL.WARNING, "Proxy:"+str(gL.Useproxy))    

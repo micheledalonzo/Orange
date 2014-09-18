@@ -468,7 +468,7 @@ def dbCreateMemTableMemAsset():
                                 AddrStreet       STRING,
                                 AddrCity         STRING,
                                 AddrZIP          STRING,
-                                AddrCountry      STRING,
+                                AddrCounty       STRING,
                                 AddrPhone        STRING,
                                 AddrWebsite      STRING,
                                 AddrRegion       STRING,
@@ -480,34 +480,6 @@ def dbCreateMemTableMemAsset():
     except Exception as err:
         gL.log(gL.ERROR, err)
         return False
-
-
-def dbCreateMemTableAssetmatch():
-    try:
-        cmd_create_table = """CREATE TABLE if not exists
-                assetmatch (
-                            asset INTEGER,
-                            name        STRING,
-                            street      STRING,
-                            city        STRING,
-                            cfrasset    INTEGER,
-                            cfrname     STRING,
-                            cfrstreet   STRING,
-                            cfrcity     STRING,
-                            nameratio   FLOATING,
-                            cityratio   FLOATING,
-                            streetratio FLOATING,
-                            gblratio    FLOATING,
-                            country     STRING,
-                            assettype   INTEGER,
-                            source      INTEGER
-        );"""
-        gL.SqLite.executescript(cmd_create_table)
-        return True
-    except Exception as err:
-        gL.log(gL.ERROR, err)
-        return False
-
 
 def dbCreateMemTableKeywords():
     try:
@@ -567,19 +539,20 @@ def CopyAssetInMemory():
             Source      = asset['source']
             Name        = asset['name']
             NameSimple  = asset['namesimple']
+            NameSimplified = asset['namesimplified']
             AddrStreet  = asset['addrstreet']
             AddrCity    = asset['addrcity']
             AddrZIP     = asset['addrzip']
-            AddrCountry = asset['addrcountry']
+            AddrCounty  = asset['addrcounty']
             AddrPhone   = asset['addrphone']
             AddrWebsite = asset['addrwebsite']
             Assettype   = asset['assettype']
             AddrRegion  = asset['addrregion']
             FormattedAddress =  asset['formattedaddress']
             gL.cLite.execute("insert into MemAsset \
-                            (aasset, asset, assettype, country, name, namesimple, addrstreet, addrcity, addrzip, addrcountry, addrphone, addrwebsite, addrregion, formattedaddress, source) \
-                                            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                            (AAsset, Asset, Assettype, Country, Name, NameSimple, AddrStreet, AddrCity, AddrZIP, AddrCountry, AddrPhone, AddrWebsite, AddrRegion, FormattedAddress, Source))
+                            (aasset, asset, assettype, country, name, namesimple, namesimplified, addrstreet, addrcity, addrzip, addrcounty, addrphone, addrwebsite, addrregion, formattedaddress, source) \
+                                            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            (AAsset, Asset, Assettype, Country, Name, NameSimple, NameSimplified, AddrStreet, AddrCity, AddrZIP, AddrCounty, AddrPhone, AddrWebsite, AddrRegion, FormattedAddress, Source))
         gL.log(gL.INFO, str(count) + " asset in memory")
         return True
     except Exception as err:

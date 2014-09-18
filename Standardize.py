@@ -16,26 +16,28 @@ try:
     gL.SqLite, gL.C = gL.OpenConnectionSqlite()
     gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)   
     runid = gL.Restart()
-    rc = gL.SetLogger(gL.RunId, gL.restart)      
+    if not gL.restart:
+        gL.RunId = gL.RunIdCreate()
+    rc = gL.SetLogger("STD", gL.RunId, gL.restart)      
     if not rc:
         gL.log(gL.ERROR, "SetLogger errato")
      
     gL.log(gL.INFO, gL.Args)
     gL.N_Ass = 0
-    # creo la tabella in memoria                
+    # creo la tabella in memoria
     rc = gL.dbCreateMemTableMemAsset()
     rc = gL.CopyAssetInMemory()
     gL.cSql.execute("Select * from QAddress order by name")
     rows = gL.cSql.fetchall()
     gL.T_Ass = len(rows)
     msg=('RUN %s: STDIZE %s Assets' % (gL.RunId, gL.T_Ass))
-    gL.log(gL.INFO, gL.Args)
+    gL.log(gL.INFO, msg)
     t1 = time.clock()
     for row in rows:
         gL.N_Ass = gL.N_Ass + 1
         Asset = row['asset']
         # "ALL" rifai tutti daccapo
-        msg=('Asset %s(%s)' % (gL.N_Ass, gL.T_Ass))
+        msg=('Asset %s - %s(%s)' % (Asset, gL.N_Ass, gL.T_Ass))
         gL.log(gL.INFO, msg)
         AssetMatch, AssetRef = gL.StdAsset(Asset, "ALL") 
         if AssetMatch is False: # is evita che 0 sia interpretato come false
@@ -46,6 +48,8 @@ try:
         # cerco le info sull'asset in Google        
         #gAsset = gL.ParseGooglePlacesMain(Asset, AAsset)
         gL.cSql.commit()
+        #if gL.N_Ass > 100:
+        #    break
     t2 = time.clock()
     print(round(t2-t1, 3))
     sys.exit(0)

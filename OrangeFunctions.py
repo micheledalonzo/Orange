@@ -23,6 +23,9 @@ def ParseArgs():
     parser.add_argument('-debug', action='store_true', default='',
                     dest='debug',
                     help="Dump tabelle interne su Db")
+    parser.add_argument('-resetnames', action='store_true', default='',
+                    dest='resetnames',
+                    help="Inizializza tutti i nomi standard prima di una nuova standardizzazione dei nomi. Esclusi i nomi modificati a mano")
 
     args = parser.parse_args()
     if args.test:
@@ -37,6 +40,8 @@ def ParseArgs():
         gL.testurl = args.testurl
     if args.debug:
         gL.debug = True
+    if args.resetnames:
+        gL.resetnames = True
     
     gL.Args = args
 
