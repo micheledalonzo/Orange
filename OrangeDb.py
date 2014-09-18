@@ -399,6 +399,7 @@ def DumpGoogleResults(Asset, name, indirizzo, chk):
 def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
     
     try:    
+        tag = []
         msg = "%s %s(%s) - %s - %s" % ('Asset:', gL.N_Ass, gL.T_Ass, name.encode('utf-8'), url.encode('utf-8'))
         gL.log(gL.INFO, msg)
         NameSimple = ''
@@ -412,25 +413,15 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
        
         if CurAsset:   # se e' gia' presente lo aggiorno
             Asset = int(CurAsset['asset'])       
-            chk = int(CurAsset['namesimplified'])       # controllo se devo riprovare a semplificare il nome
-            if chk == gL.NO:
-                NameSimple, NameSimplified, tag, cuc = gL.ManageName(name, country, assettype)
-            if name != CurAsset['name'] or NameSimple != CurAsset['namesimple'] or AAsset != CurAsset['aasset']:
-                gL.cSql.execute("Update Asset set Name=?, NameSimple=?, NameSimplified=?, AAsset=?, Updated=? where Asset=?", (name, NameSimple, NameSimplified, AAsset, gL.SetNow(), Asset))
+            gL.cSql.execute("Update Asset set Name=?, Updated=? where Asset=?", (name, gL.SetNow(), Asset))
         else:          # se no lo inserisco
-            NameSimple, NameSimplified, tag, cuc = gL.ManageName(name, country, assettype)
-            gL.cSql.execute( "Insert into Asset(Source, AssetType, Country, Url, Name, NameSimple, NameSimplified, Created, Updated, Active, GooglePid, AAsset) \
-                              Values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", \
-                            ( source, assettype, country, url, name, NameSimple, NameSimplified, gL.RunDate, gL.SetNow(), gL.YES, GooglePid, AAsset))
+            gL.cSql.execute( "Insert into Asset(Source, AssetType, Country, Url, Name, Created, Updated, Active, GooglePid, AAsset) \
+                              Values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", \
+                            ( source, assettype, country, url, name, gL.RunDate, gL.SetNow(), gL.YES, GooglePid, AAsset))
             gL.cSql.execute("SELECT @@IDENTITY")  # recupera id autonum generato
             a = gL.cSql.fetchone()
             Asset = int(a[0])
-    
-        if gL.debug and NameSimplified:            
-            gL.DumpNames(Asset, name, NameSimple)
-           
-        rc = dbAssetTag(Asset, tag, "Tipologia")
-        rc = dbAssetTag(Asset, cuc, "Cucina")
+             
         return Asset
 
     except Exception as err:

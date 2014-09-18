@@ -160,29 +160,6 @@ def NameReset():
         gL.log(gL.ERROR, err)
     
 
-def ManageName(name, country, assettype):
-    # tabella delle lingue per paese
-    CountryLang = {}
-    language = CountryLang.get(country) 
-    if language is None:
-        gL.cSql.execute("select CountryLanguage from T_Country where Country = ?", ([country]))
-        row = gL.cSql.fetchone()
-        if row:
-            language = row['countrylanguage']           
-            CountryLang[country] = language
-    if language is None:
-        gL.log(gL.ERROR, "Lingua non trovata")
-        return False
-    
-    # gestisco il nome e la tipologia del locale definita dal nome    
-    NameSimplified = gL.NO; NameSimple = ''
-    chg, newname, tag, cuc = gL.NameSimplify(language, assettype, name)
-    if chg:
-        #print("Frase trattata:", name.encode('utf-8'), "trasformata in", newname.encode('utf-8'))
-        NameSimple = newname
-        NameSimplified = gL.YES
-
-    return NameSimple, NameSimplified, tag, cuc
 
 def StdAsset(Asset, Mode):
 
