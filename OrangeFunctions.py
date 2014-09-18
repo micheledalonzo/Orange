@@ -47,10 +47,10 @@ def ParseArgs():
 
     return True
 
-def Restart():
+def Restart(RunType):
     gL.restart = False
     # determino se devo restartare - prendo l'ultimo record della tabella run    
-    gL.cSql.execute("SELECT RunId, Start, End FROM Run GROUP BY RunId, Start, End ORDER BY RunId DESC")
+    gL.cSql.execute("SELECT RunId, Start, End FROM Run where RunType = ? GROUP BY RunId, Start, End ORDER BY RunId DESC", ([RunType]))
     check = gL.cSql.fetchone()
     if check:   # se esiste un record in Run
         runid = check['runid']
@@ -65,7 +65,7 @@ def RunInit():
     try:
 
         rc = gL.dbCreateMemTableKeywords()
-        rc = gL.sql_CopyKeywordsInMemory()
+        rc = gL.CopyKeywordsInMemory()
         rc = gL.LoadProxyList()
         if not rc:       
             gL.Useproxy = False        
@@ -224,6 +224,7 @@ def CercaFrase(frase, stringa, operatore, replacew):
                         mod = True
                     conta = conta + 1
                 newstringa = " ".join(wrk)        
+                mod = True
 
             if operatore == "Replace":
                 conta = 0

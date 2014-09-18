@@ -28,7 +28,6 @@
 #
 
 from lxml import html
-
 import collections
 import pypyodbc
 import datetime
@@ -56,9 +55,6 @@ def ParseAsset(country, assettype, source, starturl, pageurl, asseturl, name):
         #AAsset = gL.dbAAsset(Asset, AssetMatch, AssetRef)   # creo il record in AAsset a partire da SourceAsseId corrente con riferimento al suo simile oppure lo aggiorno
         gL.dbQueueStatus("END", country, assettype, source, starturl, pageurl, asseturl) # scrivo nella coda che ho finito
         gL.cSql.commit()
-        # per ogni asset una call a Google Places
-        #gAsset = gL.ParseGooglePlacesMain(Asset, AAsset)
-        #gL.cSql.commit()
     return True
 
 def RestartParse():
@@ -170,7 +166,7 @@ def Main():
             else:
                 #chiudo le tabelle dei run
                 rc = gL.RunIdStatus("END")
-                rc = gL.sql_UpdDriveRun("END")
+                rc = gL.UpdDriveRun("END")
                 gL.cSql.commit()                                    
     
         # run normale
@@ -181,7 +177,7 @@ def Main():
             if len(gL.Drive) == 0:
                 print("Nessun run da eseguire")
             else:
-                gL.RunId = gL.RunIdCreate()
+                gL.RunId = gL.RunIdCreate(me)
                 rc = gL.RunIdStatus("START")  
                 if not rc:
                     gL.log(gL.ERROR, "RunId errato")        

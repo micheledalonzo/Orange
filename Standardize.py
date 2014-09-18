@@ -8,17 +8,17 @@ import sys
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import time
-
+me = "STD"
 try:
     rc = gL.ParseArgs()
     #---------------------------------------------- M A I N ------------------------------------------------
     # apri connessione e cursori, carica keywords in memoria
     gL.SqLite, gL.C = gL.OpenConnectionSqlite()
     gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)   
-    runid = gL.Restart()
+    runid = gL.Restart(me)
     if not gL.restart:
-        gL.RunId = gL.RunIdCreate()
-    rc = gL.SetLogger("STD", gL.RunId, gL.restart)      
+        gL.RunId = gL.RunIdCreate(me)
+    rc = gL.SetLogger(me, gL.RunId, gL.restart)      
     if not rc:
         gL.log(gL.ERROR, "SetLogger errato")
      
@@ -50,6 +50,9 @@ try:
         gL.cSql.commit()
         #if gL.N_Ass > 100:
         #    break
+    # chiudi DB
+    gL.CloseConnectionMySql()
+    gL.CloseConnectionSqlite()
     t2 = time.clock()
     print(round(t2-t1, 3))
     sys.exit(0)

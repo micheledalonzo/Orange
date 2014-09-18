@@ -13,8 +13,8 @@ limita = 0
 def NameSimplify(lang, assettype, nome):
     try:
         # connect to db e crea il cursore
-        gL.SqLite, gL.C = gL.OpenConnectionSqlite()
-        gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)
+        #gL.SqLite, gL.C = gL.OpenConnectionSqlite()
+        #gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)
         chg    = False
         chgwrd = False
         chgfra = False
@@ -221,15 +221,11 @@ def StdAsset(Asset, Mode):
             streetratio=streetratio_set=streetratio_partial=streetratio_ratio=0
             cityratio_ratio=cityratio_set=cityratio_partial=cityratio=0             
             webratio=phoneratio=zipratio=0
-            # se c'e' uso il nome parziale
-            A = Curasset['namesimplified']
-            B = namesimplified
-            if A == gL.YES and B == gL.TRUE: 
-                curname = Curasset['namesimple'].title(); 
-                cfrname = namesimple.title()
-            else: 
-                curname = Curasset['name'].title(); 
-                cfrname = name.title()            
+            # uso il nome standard
+            curname = Curasset['namesimple'].title()
+            cfrname = namesimple.title()            
+            #    curname = Curasset['name'].title()
+            #    cfrname = name.title()            
             nameratio_ratio = fuzz.ratio(curname, cfrname)
             nameratio_partial = fuzz.partial_ratio(curname, cfrname)
             nameratio_set = fuzz.token_set_ratio(curname, cfrname)

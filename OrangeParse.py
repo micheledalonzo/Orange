@@ -68,13 +68,13 @@ def ParseNextPage(source, assettype, country, pageurl, page):
         return False
 
 
-def ReadPage(url):
+def ReadPage(url, timetowait=5):
     #gL.log(gL.INFO, url)
     max = 10; n = 0
     while True:
         try:
             n = n + 1
-            attesa = random.randint(1, 5) # da 1 a 15 sec 
+            attesa = random.randint(1, timetowait) #
             time.sleep(attesa)
             if gL.Useproxy:
                 rand_proxy = random.choice(gL.Proxies)
@@ -85,7 +85,7 @@ def ReadPage(url):
             else:
                 page = requests.get(url)  
             page.raise_for_status()       
-            #rc = gL.dbSqlSaveContent(url, page.text)            
+            #rc = gL.SaveContent(url, page.text)            
             return html.fromstring(page.content)
         except requests.exceptions.HTTPError as e:
             status_code = e.response.status_code

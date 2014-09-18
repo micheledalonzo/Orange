@@ -45,7 +45,7 @@ def CloseConnectionSqlite():
         gL.SqLite.close()
     return True
 
-def sql_UpdDriveRun(startend):
+def UpdDriveRun(startend):
     try:
         if startend == "START":
             gL.cSql.execute("Update Drive set RunDate = ? where active = True", ([gL.RunDate]))
@@ -68,10 +68,10 @@ def RunIdStatus(startend):
         gL.log(gL.ERROR, err)
         return False
 
-def RunIdCreate():
+def RunIdCreate(RunType):
     try:
         runid = 0
-        gL.cSql.execute("Insert into Run (Start) Values (?)", ([gL.SetNow()]))
+        gL.cSql.execute("Insert into Run (Start, RunType) Values (?, ?)", (gL.SetNow(), RunType))
         gL.cSql.execute("SELECT @@IDENTITY")  # recupera id autonum generato
         run = gL.cSql.fetchone()
         if run is None:
@@ -339,7 +339,7 @@ def dbAssettAddress(Asset, AddrList):
 
     return True
 
-def dbSqlSaveContent(url, content):
+def SaveContent(url, content):
     CurContent = ''
     sql = "Select * from AssetContent where Url = '" + url + "'"
     gL.cSql.execute(sql)
@@ -555,7 +555,7 @@ def CopyAssetInMemory():
         return False
 
 
-def sql_CopyKeywordsInMemory():
+def CopyKeywordsInMemory():
     
     gL.cSql.execute("Select * from Assetkeywords order by keyword")
     ks = gL.cSql.fetchall()

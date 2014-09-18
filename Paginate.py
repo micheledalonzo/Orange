@@ -16,14 +16,12 @@ import locale
 from urllib.parse import urlparse
 import OrangeGbl as gL
 work_queue = collections.deque()
-   
+me = "PAG"
 
 def BuildAssetList(country, assettype, source, starturl, pageurl, runlogid):    
     try:
 
         #   inizia da starturl e interpreta le pagine di lista costruendo la coda degli asset da esaminare
-        #rc = gL.PagesCreate(source, assettype, country, starturl, pageurl)
-        #gL.sql_Queue(country, assettype, source, starturl, pageurl)
         work_queue.append((pageurl, ""))
 
         while len(work_queue):
@@ -166,8 +164,8 @@ def Main():
         gL.SqLite, gL.C = gL.OpenConnectionSqlite()
         gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)           
         gL.restart == False
-        runid = gL.Restart()
-        rc = gL.SetLogger("PGN", gL.RunId, gL.restart)     
+        runid = gL.Restart(me)
+        rc = gL.SetLogger(me, gL.RunId, gL.restart)     
         gL.log(gL.INFO, gL.Args)       
         if  gL.restart == True:            
             gL.RunId = runid    
@@ -181,7 +179,7 @@ def Main():
             else:
                 #chiudo le tabelle dei run
                 rc = gL.RunIdStatus("END")
-                rc = gL.sql_UpdDriveRun("END")
+                rc = gL.UpdDriveRun("END")
                 gL.cSql.commit()                                    
     
         # run normale
@@ -192,7 +190,7 @@ def Main():
             if len(gL.Drive) == 0:
                 gL.log(gL.WARNING, "Nessun run da eseguire")
             else:
-                gL.RunId = gL.RunIdCreate()
+                gL.RunId = gL.RunIdCreate(me)
                 rc = gL.RunIdStatus("START")  
                 if not rc:
                     gL.log(gL.ERROR, "RunId errato")        
