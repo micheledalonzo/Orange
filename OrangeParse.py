@@ -27,37 +27,45 @@ requests_log.setLevel(logging.WARNING)
 
 
 def BuildQueue(country, assettype, source, starturl, pageurl, page):     
-    fn = gL.GetFunzione("QUEUE", source, assettype, country)
-    if not fn:
-        gL.log(gL.ERROR, "Funzione PARSE non trovata")
+    try:
+        fn = gL.GetFunzione("QUEUE", source, assettype, country)
+        if not fn:
+            raise Exception("Funzione QUEUE non trovata")            
+        return globals()[fn](country, assettype, source, starturl, pageurl, page)
+
+    except Exception as err:
+        gL.log(gL.ERROR, err)
         return False
-    return globals()[fn](country, assettype, source, starturl, pageurl, page)
-     
-    #return globals()[gL.queue_fn](country, assettype, source, starturl, pageurl, page)
+
     
 def ParseContent(country, assettype, source, starturl, asseturl, name):   
-
-    Asset = gL.dbAsset(country, assettype, source, name, asseturl)  # inserisco l'asset
-    fn = gL.GetFunzione("PARSE", source, assettype, country)
-    if not fn:
-        gL.log(gL.ERROR, "Funzione PARSE non trovata")
-        return False
-    #rc = globals()[gL.parse_fn](country, asseturl, name, Asset) 
-    rc = globals()[fn](country, asseturl, name, Asset)
-    if rc:
-        return Asset
-    else:
-        gL.log(gL.ERROR, "Errore " + str(rc) + " nel parse")
+    try:
+        Asset = gL.dbAsset(country, assettype, source, name, asseturl)  # inserisco l'asset
+        if Asset == 0:
+            raise Exception("Errore nella creazione dell'asset")
+        fn = gL.GetFunzione("PARSE", source, assettype, country)
+        if not fn:            
+            raise Exception("Funzione PARSE non trovata")           
+        rc = globals()[fn](country, asseturl, name, Asset)
+        if rc:
+            return Asset
+        else:
+            raise Exception("Funzione PARSE con errori")
+    except Exception as err:
+        gL.log(gL.ERROR, err)
         return False
 
         
 def ParseNextPage(source, assettype, country, pageurl, page):
-    #return globals()[gL.nxpage_fn](pageurl, page)
-    fn = gL.GetFunzione("NEXT", source, assettype, country)
-    if not fn:
-        gL.log(gL.ERROR, "Funzione NEXT non trovata")
+    try:
+        fn = gL.GetFunzione("NEXT", source, assettype, country)
+        if not fn:
+            raise Exception("Funzione NEXT non trovata")            
+        return globals()[fn](pageurl, page)
+
+    except Exception as err:
+        gL.log(gL.ERROR, err)
         return False
-    return globals()[fn](pageurl, page)
 
 
 def ReadPage(url):
