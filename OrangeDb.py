@@ -74,6 +74,8 @@ def RunIdCreate():
         gL.cSql.execute("Insert into Run (Start) Values (?)", ([gL.SetNow()]))
         gL.cSql.execute("SELECT @@IDENTITY")  # recupera id autonum generato
         run = gL.cSql.fetchone()
+        if run is None:
+            raise Exception("Get autonum generato con errore")
         runid = run[0]    
         return runid
     except Exception as err:        
@@ -122,7 +124,7 @@ def sql_RestartUrl(country, assettype, source, rundate, starturl="", pageurl="")
                             group by starturl, pageurl order by InsertDate desc"),\
                             (country, assettype, source, rundate) )
         a = gL.cSql.fetchone()    
-        if a:
+        if a is not None:
             starturl = a['starturl']
             pageurl = a['pageurl']
             return starturl, pageurl
@@ -146,7 +148,7 @@ def dbAssetTag(Asset, tag, tagname):
                     continue
                 gL.cSql.execute("Select * from AssetTag where Asset=? and TagName=? and Tag=?", (Asset, tagname, i))
                 a = gL.cSql.fetchone()
-                if not a:
+                if a is None:
                     gL.cSql.execute("Insert into AssetTag(Asset, TagName, Tag) Values (?, ?, ?)", (Asset, tagname, i))
 
         return True
@@ -303,7 +305,7 @@ def dbAssettAddress(Asset, AddrList):
 
         gL.cSql.execute("Select * from AssetAddress where Asset = ?", ([Asset]))
         CurAsset = gL.cSql.fetchone()
-        if CurAsset:          
+        if CurAsset is not None:          
             # controlla se ci sono dati cambiati
             if (       AddrStreet != CurAsset['AddrStreet'] or AddrCity        != CurAsset['AddrCity']          \
                     or AddrCounty != CurAsset['AddrCounty'] or AddrZIP         != CurAsset['AddrZIP']           \
@@ -343,7 +345,7 @@ def dbSqlSaveContent(url, content):
     gL.cSql.execute(sql)
     check = gL.cSql.fetchone()
     try:
-        if check:
+        if check is not None:
             CurContent = check['content']
             if CurContent != content:
                 gL.cSql.execute("Update AssetContent set Content=?, RunId=? where url=?", (content, gL.RunId, url))
@@ -411,7 +413,7 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
             gL.cSql.execute("Select * from Asset where GooglePid = ?", ([GooglePid]))
             CurAsset = gL.cSql.fetchone()
        
-        if CurAsset:   # se e' gia' presente lo aggiorno
+        if CurAsset is not None:   # se e' gia' presente lo aggiorno
             Asset = int(CurAsset['asset'])       
             gL.cSql.execute("Update Asset set Name=?, Updated=? where Asset=?", (name, gL.SetNow(), Asset))
         else:          # se no lo inserisco
@@ -420,6 +422,8 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
                             ( source, assettype, country, url, name, gL.RunDate, gL.SetNow(), gL.YES, GooglePid, AAsset))
             gL.cSql.execute("SELECT @@IDENTITY")  # recupera id autonum generato
             a = gL.cSql.fetchone()
+            if a is none:
+                raise Exception("Get autonum errato")
             Asset = int(a[0])
              
         return Asset
@@ -434,8 +438,8 @@ def dbLastReviewDate(Asset, LastReviewDate):
         # aggiorna la data di ultima recensione
         gL.cSql.execute("select LastReviewDate from Asset where Asset=?", ([Asset]))
         row = gL.cSql.fetchone()
-        if len(row) == 0:
-            return True
+        if row is None:
+            raise Exception("Errore: Asset non trovato")
         CurLastReviewDate = row[0]
         if CurLastReviewDate is None or (CurLastReviewDate < LastReviewDate):
             gL.cSql.execute("Update Asset set LastReviewDate=? where Asset=?", (LastReviewDate, Asset))
@@ -503,6 +507,8 @@ def dbAAsset(Asset, AssetMatch, AssetRef):
             gL.cSql.execute("Insert into AAsset (Updated) values (?)" , ([gL.RunDate]))
             gL.cSql.execute("SELECT @@IDENTITY")  # recupera id autonum generato
             lstrec = gL.cSql.fetchone()
+            if lstrec is None:
+                raise Exception("Errore get autonum")
             AAsset = int(lstrec[0])
             gL.cSql.execute("Update Asset set AAsset=? where Asset=?", (AAsset, Asset))
         else:
