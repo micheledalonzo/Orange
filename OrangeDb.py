@@ -420,7 +420,7 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
                             ( source, assettype, country, url, name, gL.RunDate, gL.SetNow(), gL.YES, GooglePid, AAsset))
             gL.cSql.execute("SELECT @@IDENTITY")  # recupera id autonum generato
             a = gL.cSql.fetchone()
-            if a is none:
+            if a is None:
                 raise Exception("Get autonum errato")
             Asset = int(a[0])
              
