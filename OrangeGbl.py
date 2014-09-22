@@ -102,9 +102,9 @@ def SetLogger(Typ, RunId, restart):
  
     # create debug file handler and set level to debug
     if restart:
-        handler = logging.FileHandler("C:\\Orange\\Log\\"+Typ+"-"+str(RunId)+".log","w")
-    else:
         handler = logging.FileHandler("C:\\Orange\\Log\\"+Typ+"-"+str(RunId)+".log","a")
+    else:
+        handler = logging.FileHandler("C:\\Orange\\Log\\"+Typ+"-"+str(RunId)+".log","w")
     handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('[%(levelname)-8s] [%(asctime)s] [%(message)s]', "%d-%m %H:%M:%S")
     handler.setFormatter(formatter)
