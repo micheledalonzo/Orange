@@ -220,3 +220,6 @@ Orange.sln
 *.pyproj
 *.pyproj
 *.ldb
+*.pydevproject
+.settings/org.eclipse.core.resources.prefs
+.project
