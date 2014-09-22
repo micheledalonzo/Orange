@@ -25,6 +25,7 @@ N_Ass           = 0
 T_Ass           = 0
 testrun         = False
 debug           = False
+trace           = False
 Frasi           = []
 Drive           = []
 Parole          = []

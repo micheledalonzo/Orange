@@ -19,6 +19,7 @@ work_queue = collections.deque()
 me = "PAG"
 
 def BuildAssetList(country, assettype, source, starturl, pageurl, runlogid):    
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
 
         #   inizia da starturl e interpreta le pagine di lista costruendo la coda degli asset da esaminare
@@ -54,6 +55,7 @@ def BuildAssetList(country, assettype, source, starturl, pageurl, runlogid):
     return True
 
 def RestartPaginate():
+    if gL.trace: gL.log(gL.DEBUG)   
     try:        
         
         gL.cSql.execute("SELECT * from QPagesRestart")   # rileggo tutti i record della tabella pages che non sono stati completati e li processo nuovamente
@@ -103,6 +105,7 @@ def RestartPaginate():
         return False
 
 def NormalPaginate():
+    if gL.trace: gL.log(gL.DEBUG)   
     try:    
         for drive in gL.Drive:              # inserisco gli starturl nel run
             country = drive['country']  
@@ -157,6 +160,7 @@ def NormalPaginate():
         return False
 
 def Main():
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         rc = gL.ParseArgs()
         #---------------------------------------------- M A I N ------------------------------------------------
@@ -220,7 +224,7 @@ def Main():
 
 
 if __name__ == "__main__":
-       
+    if gL.trace: gL.log(gL.DEBUG)   
     rc = Main()
     if not rc:
         gL.log(gL.ERROR, "Run terminato in modo errato")        

@@ -13,16 +13,20 @@ import urllib
 import argparse
 
 def ParseArgs():
+    if gL.trace: gL.log(gL.DEBUG)   
     parser = argparse.ArgumentParser()
     parser.add_argument('-test', action='store_true', default=False,
                     dest='test',
-                    help='Decide se il run e di test')
+                    help='Decide se il run e di test, e cambia il DNS del database in DsnTest')
     parser.add_argument('-url', action='store', default='',
                     dest='testurl',
                     help="Esamina solo l'url")
     parser.add_argument('-debug', action='store_true', default='',
                     dest='debug',
                     help="Dump tabelle interne su Db")
+    parser.add_argument('-trace', action='store_true', default='',
+                    dest='trace',
+                    help="Traccia sul log tutte le chiamate alle funzioni")
     parser.add_argument('-resetnames', action='store_true', default='',
                     dest='resetnames',
                     help="Inizializza tutti i nomi standard prima di una nuova standardizzazione dei nomi. Esclusi i nomi modificati a mano")
@@ -40,6 +44,8 @@ def ParseArgs():
         gL.testurl = args.testurl
     if args.debug:
         gL.debug = True
+    if args.trace:
+        gL.trace = True
     if args.resetnames:
         gL.resetnames = True
     
@@ -48,6 +54,7 @@ def ParseArgs():
     return True
 
 def Restart(RunType):
+    if gL.trace: gL.log(gL.DEBUG)   
     gL.restart = False
     # determino se devo restartare - prendo l'ultimo record della tabella run    
     gL.cSql.execute("SELECT RunId, Start, End FROM Run where RunType = ? GROUP BY RunId, Start, End ORDER BY RunId DESC", ([RunType]))
@@ -61,9 +68,10 @@ def Restart(RunType):
             return runid
     return 0
 
-def RunInit():        
+def RunInit():
+    if gL.trace: gL.log(gL.DEBUG)        
+    
     try:
-
         rc = gL.dbCreateMemTableKeywords()
         rc = gL.CopyKeywordsInMemory()
         rc = gL.LoadProxyList()
@@ -90,7 +98,6 @@ def SetNow():
     return str(wrk.replace(microsecond = 0))
 
 def StdCar(stringa):
-    
     if isinstance(stringa, list):
         clean = stringa[0]
     else:
@@ -108,6 +115,7 @@ def StdName(stringa):
     return stringa.title()
 
 def StdPhone(stringa, country):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         
         test = stringa.split(' - ')   # due numeri di tel separati da trattino
@@ -157,6 +165,7 @@ def StdPhone(stringa, country):
     return (newphone, newphone1)
 
 def GetFunzione(tipo, source, assettype, country):
+    if gL.trace: gL.log(gL.DEBUG)   
     for k in gL.Funzioni:
         if k['source'] == source and k['assettype'] == assettype and k['country'] == country: 
             if tipo == "PARSE":
@@ -173,6 +182,7 @@ def StdZip(stringa):
     return stringa
 
 def CercaFrase(frase, stringa, operatore, replacew):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:        
         mod = False
         stringa = str(stringa)
@@ -263,6 +273,7 @@ def OkParam():
 
 
 def StdAddress(AddrStreet, AddrZIP, AddrCity, AddrCountry, indirizzo=''):    
+    if gL.trace: gL.log(gL.DEBUG)   
     gL.GmapNumcalls = gL.GmapNumcalls + 1
     
     AddrRegion = ''

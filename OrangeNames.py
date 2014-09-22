@@ -11,6 +11,7 @@ limita = 0
 
 
 def NameSimplify(lang, assettype, nome):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         # connect to db e crea il cursore
         #gL.SqLite, gL.C = gL.OpenConnectionSqlite()
@@ -152,6 +153,7 @@ def NameSimplify(lang, assettype, nome):
     return chg, newname, typ, cuc
 
 def NameReset():
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         # per tutte le righe che non hanno il flag DoNotTouch sbianca il simplename e azzera il flag
         gL.cSql.execute("UPDATE Asset SET NameSimple = '', NameSimplified = ? WHERE NameDoNotTouch = ?", (gL.NO, gL.YES))
@@ -162,7 +164,7 @@ def NameReset():
 
 
 def StdAsset(Asset, Mode):
-
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         t1 = time.clock()
         tabratio = []

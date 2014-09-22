@@ -39,8 +39,10 @@ import locale
 from urllib.parse import urlparse
 import OrangeGbl as gL
 work_queue = collections.deque()
+me = "PRS"
 
 def ParseAsset(country, assettype, source, starturl, pageurl, asseturl, name):
+    if gL.trace: gL.log(gL.DEBUG)   
     # parse delle singole pagine degli asset
     gL.dbQueueStatus("START", country, assettype, source, starturl, pageurl, asseturl) # scrivo nella coda che inizio
     Asset = gL.ParseContent(country, assettype, source, starturl, asseturl, name)                                                                      
@@ -58,6 +60,7 @@ def ParseAsset(country, assettype, source, starturl, pageurl, asseturl, name):
     return True
 
 def RestartParse():
+    if gL.trace: gL.log(gL.DEBUG)   
     try:        
         gL.cSql.execute("SELECT * from QParseRestart ORDER BY rnd(queueid)")
         check = gL.cSql.fetchall()   # l'ultima
@@ -98,7 +101,7 @@ def RestartParse():
 
 
 def NormalParse():
-
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         # ---------------- messaggio con totale asset da esaminare
         gL.cSql.execute("SELECT * FROM QQueue")
@@ -143,14 +146,15 @@ def NormalParse():
 
 def Main():
     try:
+
         rc = gL.ParseArgs()
         #---------------------------------------------- M A I N ------------------------------------------------
         # apri connessione e cursori, carica keywords in memoria
         gL.SqLite, gL.C = gL.OpenConnectionSqlite()
         gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)   
         gL.restart == False
-        runid = gL.Restart()
-        rc = gL.SetLogger("PRS", gL.RunId, gL.restart)            
+        runid = gL.Restart(me)
+        rc = gL.SetLogger(me, gL.RunId, gL.restart)            
         gL.log(gL.INFO, gL.Args)
 
         if  gL.restart == True:
@@ -181,7 +185,7 @@ def Main():
                 rc = gL.RunIdStatus("START")  
                 if not rc:
                     gL.log(gL.ERROR, "RunId errato")        
-                rc = gL.SetLogger("PRS", gL.RunId, gL.restart)
+                rc = gL.SetLogger(me, gL.RunId, gL.restart)
                 if not rc:
                     gL.log(gL.ERROR, "SetLogger errato")        
                 gL.log(gL.WARNING, "Proxy:"+str(gL.Useproxy))    
@@ -207,7 +211,7 @@ def Main():
         return False
     
 if __name__ == "__main__":
-       
+
     rc = Main()
     if not rc:
         gL.log(gL.ERROR, "Run terminato in modo errato")        

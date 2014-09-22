@@ -9,12 +9,14 @@ import pypyodbc
 import OrangeGbl as gL
 
 def OpenConnectionMySql(dsn):
+    if gL.trace: gL.log(gL.DEBUG)   
     if not gL.MySql:
         gL.MySql = pypyodbc.connect(dsn)
         gL.cSql = gL.MySql.cursor()
     return gL.MySql, gL.cSql
 
 def OpenConnectionSqlite():
+    if gL.trace: gL.log(gL.DEBUG)   
     if not gL.SqLite:
         gL.SqLite = sqlite3.connect(':memory:')
         gL.cLite = gL.SqLite.cursor()
@@ -22,12 +24,13 @@ def OpenConnectionSqlite():
     return gL.SqLite, gL.cLite
 
 def CloseConnectionMySql():
-    
+    if gL.trace: gL.log(gL.DEBUG)   
     if gL.MySql:
         gL.MySql.close()
     return True
 
 def LoadProxyList():
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         gL.cSql.execute("Select * from RunProxies where Active = ?", ([gL.YES]) )
         proxies = gL.cSql.fetchall()
@@ -41,11 +44,13 @@ def LoadProxyList():
         return False
 
 def CloseConnectionSqlite():
+    if gL.trace: gL.log(gL.DEBUG)   
     if gL.SqLite:
         gL.SqLite.close()
     return True
 
 def UpdDriveRun(startend):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         if startend == "START":
             gL.cSql.execute("Update Drive set RunDate = ? where active = True", ([gL.RunDate]))
@@ -56,6 +61,7 @@ def UpdDriveRun(startend):
         return False
 
 def RunIdStatus(startend):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         if startend == "START":
             gL.cSql.execute("Update Run set Start = ? where RunId = ? ", (gL.SetNow(), gL.RunId)) 
@@ -69,6 +75,7 @@ def RunIdStatus(startend):
         return False
 
 def RunIdCreate(RunType):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         runid = 0
         gL.cSql.execute("Insert into Run (Start, RunType) Values (?, ?)", (gL.SetNow(), RunType))
@@ -84,6 +91,7 @@ def RunIdCreate(RunType):
 
 
 def PagesCreate(source, assettype, country, starturl, pageurl):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         if pageurl == None or pageurl == '':
             pageurl = starturl    # se c'è gia resetto le date
@@ -102,6 +110,7 @@ def PagesCreate(source, assettype, country, starturl, pageurl):
     
 
 def PagesStatus(startend, country, assettype, source, starturl, pageurl):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         if startend == "START":       
             gL.cSql.execute("Update Pages set Start = ?, End = 0 where source = ? and assettype = ? and country = ? and starturl = ? and pageurl = ?", \
@@ -117,6 +126,7 @@ def PagesStatus(startend, country, assettype, source, starturl, pageurl):
     
 
 def sql_RestartUrl(country, assettype, source, rundate, starturl="", pageurl=""):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         # se richiesto il restart prendo l'ultimo record di paginazione creato nel run precedente
         gL.cSql.execute( ("SELECT StartUrl, PageUrl, max(InsertDate) FROM Queue where \
@@ -136,7 +146,7 @@ def sql_RestartUrl(country, assettype, source, rundate, starturl="", pageurl="")
 
 
 def dbAssetTag(Asset, tag, tagname):
-     
+    if gL.trace: gL.log(gL.DEBUG)    
     try:
         # cancella e riscrive la classificazione dell'asset     
         if len(tag)>0:
@@ -159,6 +169,7 @@ def dbAssetTag(Asset, tag, tagname):
 
 
 def dbAssetReview(Asset, r):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         if len(r) == 0:
             return True
@@ -175,7 +186,7 @@ def dbAssetReview(Asset, r):
 
 
 def dbAssetPrice(Asset, PriceList, currency):
-
+    if gL.trace: gL.log(gL.DEBUG)   
     try:     
         # cancella e riscrive la classificazione dell'asset  
         if len(PriceList)>0:                
@@ -207,6 +218,7 @@ def dbAssetPrice(Asset, PriceList, currency):
 
 
 def dbEnqueue(country, assettype, source, starturl, pageurl, asseturl, name):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:    
         # inserisce un url alla coda oppure lo aggiorna con la data del parsing e col numero del run     
         if pageurl is None or pageurl == '':
@@ -226,6 +238,7 @@ def dbEnqueue(country, assettype, source, starturl, pageurl, asseturl, name):
     
 
 def dbQueueStatus(startend, country, assettype, source, starturl, pageurl, asseturl):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         if startend == "START":
             gL.cSql.execute("Update queue set Start=?, End=0, RunId=? where Country=? and AssetType=? and Source=? and Starturl=? and Pageurl=? and AssetUrl=?", \
@@ -241,6 +254,7 @@ def dbQueueStatus(startend, country, assettype, source, starturl, pageurl, asset
 
 
 def dbAssetOpening(Asset, orario):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         gL.cSql.execute("Delete * from AssetOpening where Asset = ? ", ([Asset]))
         for j in orario:
@@ -256,7 +270,7 @@ def dbAssetOpening(Asset, orario):
 
 
 def dbAssettAddress(Asset, AddrList):
-
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         AddrStreet = ""
         AddrCity = ""
@@ -340,6 +354,7 @@ def dbAssettAddress(Asset, AddrList):
     return True
 
 def SaveContent(url, content):
+    if gL.trace: gL.log(gL.DEBUG)   
     CurContent = ''
     sql = "Select * from AssetContent where Url = '" + url + "'"
     gL.cSql.execute(sql)
@@ -360,6 +375,7 @@ def SaveContent(url, content):
     return True
 
 def DumpTabratio(tabratio):
+    if gL.trace: gL.log(gL.DEBUG)   
     if len(tabratio) == 0:
         return
     for item in tabratio:\
@@ -374,6 +390,7 @@ def DumpTabratio(tabratio):
     return
 
 def DumpNames(Asset, name, NameSimple):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         gL.cSql.execute("Delete from Debug_Names where Asset = ?", ([Asset]))             
         gL.cSql.execute("Insert into Debug_Names(Asset, Name, Newname) \
@@ -387,6 +404,8 @@ def DumpNames(Asset, name, NameSimple):
 
 
 def DumpGoogleResults(Asset, name, indirizzo, chk):
+    if gL.trace: gL.log(gL.DEBUG)   
+
     if len(chk) == 0:
         return
     for item in chk:       
@@ -399,7 +418,7 @@ def DumpGoogleResults(Asset, name, indirizzo, chk):
     return True
 
 def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
-    
+    if gL.trace: gL.log(gL.DEBUG)   
     try:    
         tag = []
         msg = "%s %s(%s) - %s - %s" % ('Asset:', gL.N_Ass, gL.T_Ass, name.encode('utf-8'), url.encode('utf-8'))
@@ -432,6 +451,7 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
 
 
 def dbLastReviewDate(Asset, LastReviewDate):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         # aggiorna la data di ultima recensione
         gL.cSql.execute("select LastReviewDate from Asset where Asset=?", ([Asset]))
@@ -448,6 +468,7 @@ def dbLastReviewDate(Asset, LastReviewDate):
 
 
 def dbCreateMemTableMemAsset():
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         cmd_create_table = """CREATE TABLE if not exists
                     MemAsset (
@@ -475,6 +496,7 @@ def dbCreateMemTableMemAsset():
         return False
 
 def dbCreateMemTableKeywords():
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         cmd_create_table = """CREATE TABLE if not exists 
                   keywords (
@@ -498,6 +520,7 @@ def dbCreateMemTableKeywords():
 
 
 def dbAAsset(Asset, AssetMatch, AssetRef):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         if AssetMatch == 0:   # devo inserire me stesso
             gL.cSql.execute("select * from asset where asset = ?", ([Asset]))
@@ -520,7 +543,7 @@ def dbAAsset(Asset, AssetMatch, AssetRef):
         return False
 
 def CopyAssetInMemory():
-    
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         gL.log(gL.INFO, "Loading assets....")
         gL.cSql.execute("Select * from QAddress order by Name")
@@ -556,7 +579,7 @@ def CopyAssetInMemory():
 
 
 def CopyKeywordsInMemory():
-    
+    if gL.trace: gL.log(gL.DEBUG)   
     gL.cSql.execute("Select * from Assetkeywords order by keyword")
     ks = gL.cSql.fetchall()
     for k in ks:

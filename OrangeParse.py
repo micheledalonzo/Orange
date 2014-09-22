@@ -27,6 +27,8 @@ requests_log.setLevel(logging.WARNING)
 
 
 def BuildQueue(country, assettype, source, starturl, pageurl, page):     
+    if gL.trace: gL.log(gL.DEBUG)   
+
     try:
         fn = gL.GetFunzione("QUEUE", source, assettype, country)
         if not fn:
@@ -39,6 +41,8 @@ def BuildQueue(country, assettype, source, starturl, pageurl, page):
 
     
 def ParseContent(country, assettype, source, starturl, asseturl, name):   
+    if gL.trace: gL.log(gL.DEBUG)   
+
     try:
         Asset = gL.dbAsset(country, assettype, source, name, asseturl)  # inserisco l'asset
         if Asset == 0:
@@ -57,6 +61,7 @@ def ParseContent(country, assettype, source, starturl, asseturl, name):
 
         
 def ParseNextPage(source, assettype, country, pageurl, page):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         fn = gL.GetFunzione("NEXT", source, assettype, country)
         if not fn:
@@ -69,7 +74,7 @@ def ParseNextPage(source, assettype, country, pageurl, page):
 
 
 def ReadPage(url, timetowait=5):
-    #gL.log(gL.INFO, url)
+    if gL.trace: gL.log(gL.DEBUG)   
     max = 10; n = 0
     while True:
         try:
@@ -119,6 +124,7 @@ def ReadPage(url, timetowait=5):
     return None
 
 def NextpageTripadvisor(url, page):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
     
         # get la prossima pagina lista e inseriscila nella coda di lavoro e nella
@@ -140,10 +146,9 @@ def NextpageTripadvisor(url, page):
     return False, ''
          
 def NextpageDuespaghi(url, page):
-
-    try:
-
-     
+    if gL.trace: gL.log(gL.DEBUG)   
+    
+    try: 
         #   DUESPAGHI - PAGINAZIONE - RICEVE UNA PAGINA, E RESTIRUISCE URL DELLA NEXT
         o = urlparse(url)
         found = re.search('pag=(.+?)&', o.query).group(1)
@@ -173,6 +178,7 @@ def NextpageDuespaghi(url, page):
     return False, ''
 
 def NextpageViamichelin(url, page):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         # format: http://www.viamichelin.it/web/Ristoranti/Ristoranti-Italia?page=2
 
@@ -214,9 +220,8 @@ def NextpageViamichelin(url, page):
     return False, ''
 
 def NextpageQristoranti(url, page):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
-
-    
         # get la prossima pagina lista e inseriscila nella coda di lavoro e nella
         # tabella starturl
         # per tutti i link rel next
@@ -244,9 +249,9 @@ def NextpageQristoranti(url, page):
     return False, ''
 
 def ParseTripadvisor(country, url, name, Asset):
+    if gL.trace: gL.log(gL.DEBUG)   
 
     try:
-
         # leggi la pagina di contenuti
         content = ReadPage(url)
         if content is  None:
@@ -379,6 +384,7 @@ def ParseTripadvisor(country, url, name, Asset):
     return True
 
 def ParseGooglePlacesMain(Asset, AAsset):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:        
         gL.cSql.execute("Select * from QAddress where Asset = ?", ([Asset]))
         row = gL.cSql.fetchone()
@@ -408,6 +414,7 @@ def ParseGooglePlacesMain(Asset, AAsset):
         return False
 
 def ParseGooglePlaces(Asset, assettype, name, street, zip, city, country, address, AAsset):
+    if gL.trace: gL.log(gL.DEBUG)   
     if address != '':
         indirizzo = address
     else:
@@ -629,6 +636,7 @@ def ParseGooglePlaces(Asset, assettype, name, street, zip, city, country, addres
 
 
 def ParseDuespaghi(country, url, name, Asset):
+    if gL.trace: gL.log(gL.DEBUG)   
 
     try:    
 
@@ -752,6 +760,7 @@ def ParseDuespaghi(country, url, name, Asset):
     return True
 
 def ParseViamichelin(country, url, name, Asset):
+    if gL.trace: gL.log(gL.DEBUG)   
         
     try:    
 
@@ -865,6 +874,7 @@ def ParseViamichelin(country, url, name, Asset):
     return True
 
 def ParseQristoranti(country, url, name, Asset):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
         # leggi la pagina di contenuti
         content = ReadPage(url)
@@ -996,6 +1006,7 @@ def ParseQristoranti(country, url, name, Asset):
     return True
 
 def QueueTripadvisor(country, assettype, source, starturl, pageurl, page):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
 
         # leggi la lista e inserisci asset
@@ -1016,6 +1027,7 @@ def QueueTripadvisor(country, assettype, source, starturl, pageurl, page):
     return True
 
 def QueueDuespaghi(country, assettype, source, starturl, pageurl, page):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
 
         lista = page.xpath('//a[@class="clearfix"]')  # funziona
@@ -1053,6 +1065,7 @@ def QueueDuespaghi(country, assettype, source, starturl, pageurl, page):
     return True
 
 def QueueViamichelin(country, assettype, source, starturl, pageurl, page):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
 
         #lista = page.xpath('//a[@class="clearfix"]')  # funziona
@@ -1088,6 +1101,7 @@ def QueueViamichelin(country, assettype, source, starturl, pageurl, page):
     return True
 
 def QueueQristoranti(country, assettype, source, starturl, pageurl, page):
+    if gL.trace: gL.log(gL.DEBUG)   
     try:
 
         # leggi la lista e inserisci asset
