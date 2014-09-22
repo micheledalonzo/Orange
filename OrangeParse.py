@@ -118,7 +118,6 @@ def ReadPage(url, timetowait=5):
             break
         except:
             gL.log(gL.ERROR, url)
-            gL.log(gL.ERROR, sys.exc_info()[0])
             break
 
     return None
