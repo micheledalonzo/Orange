@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0367946f-c9a4-44bf-b1f4-5872b3cabc1f}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>rngParse.py</StartupFile>
+    <StartupFile>Parse.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -14,7 +14,7 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <UseIISExpress>true</UseIISExpress>
-    <CommandLineArguments />
+    <CommandLineArguments>-test -debug -trace</CommandLineArguments>
     <InterpreterPath />
     <InterpreterArguments />
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
@@ -25,16 +25,16 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
+    <Compile Include="GPlaces.py" />
     <Compile Include="jabba_webkit.py" />
+    <Compile Include="OrangeDb.py" />
+    <Compile Include="OrangeFunctions.py" />
+    <Compile Include="OrangeGbl.py" />
+    <Compile Include="OrangeParse.py" />
+    <Compile Include="Paginate.py" />
+    <Compile Include="Parse.py" />
     <Compile Include="pygeocoder.py" />
-    <Compile Include="rngDb.py" />
-    <Compile Include="rngFunctions.py" />
-    <Compile Include="rngGbl.py" />
-    <Compile Include="rngNames.py" />
-    <Compile Include="rngPaginate.py" />
-    <Compile Include="rngParse.py" />
-    <Compile Include="rngParsing.py" />
-    <Compile Include="rngTestUrl.py" />
+    <Compile Include="Standardize.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\3.4" />
@@ -45,6 +45,9 @@
       <ProductId>Django</ProductId>
       <FriendlyName>Django 1.4</FriendlyName>
     </WebPiReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="OrangeMaster.mdbmodel" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Python Tools\Microsoft.PythonTools.Django.targets" />
   <ProjectExtensions>

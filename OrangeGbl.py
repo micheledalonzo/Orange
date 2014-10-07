@@ -10,12 +10,13 @@ import datetime
 import re
 import inspect
 import traceback
+import linecache
 import logging
 import sys
 import pprint
 import traceback
 import sys
-import linecache
+
 import locale
 locale.setlocale(locale.LC_ALL, '')
 

@@ -495,30 +495,6 @@ def dbCreateMemTableMemAsset():
         gL.log(gL.ERROR, err)
         return False
 
-def dbCreateMemTableKeywords():
-    if gL.trace: gL.log(gL.DEBUG)   
-    try:
-        cmd_create_table = """CREATE TABLE if not exists 
-                  keywords (
-                            assettype   STRING,
-                            language    STRING,
-                            keyword     STRING,
-                            operatore   STRING,
-                            tipologia1  STRING,
-                            tipologia2  STRING,
-                            tipologia3  STRING,
-                            tipologia4  STRING,
-                            tipologia5  STRING,
-                            replacewith STRING,
-                            numwords    INTEGER
-        );"""
-        gL.SqLite.executescript(cmd_create_table)
-        return True
-    except Exception as err:
-        gL.log(gL.ERROR, err)
-        return False
-
-
 def dbAAsset(Asset, AssetMatch, AssetRef):
     if gL.trace: gL.log(gL.DEBUG)   
     try:
@@ -578,23 +554,3 @@ def CopyAssetInMemory():
         return False
 
 
-def CopyKeywordsInMemory():
-    if gL.trace: gL.log(gL.DEBUG)   
-    gL.cSql.execute("Select * from Assetkeywords order by keyword")
-    ks = gL.cSql.fetchall()
-    for k in ks:
-        assettype   = k['assettype']
-        language    = k['language']
-        keyword     = k['keyword']
-        operatore   = k['operatore']
-        tipologia1  = k['tipologia1']
-        tipologia2  = k['tipologia2']
-        tipologia3  = k['tipologia3']
-        tipologia4  = k['tipologia4']
-        tipologia5  = k['tipologia5']
-        replacewith = k['replacewith']
-        kwdnumwords = k['kwdnumwords']
-        numwords    = len(keyword.split())
-        gL.cLite.execute("insert into keywords (assettype, language, keyword, operatore,tipologia1,tipologia2,replacewith,numwords) values (?, ?, ?, ?, ?, ?, ?, ?)",
-                                        (assettype, language, keyword, operatore,tipologia1,tipologia2,replacewith,numwords))
-    return
