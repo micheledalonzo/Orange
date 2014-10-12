@@ -88,7 +88,7 @@ def ReadPage(url, timetowait=5):
                 gL.log(gL.INFO, "proxy=" + rand_proxy)
                 page = requests.get(url,proxies=proxy)  
             else:
-                page = requests.get(url)  
+                page = requests.get(url, timeout=2)  
             page.raise_for_status()       
             #rc = gL.SaveContent(url, page.text)            
             return html.fromstring(page.content)
