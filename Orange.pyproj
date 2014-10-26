@@ -34,7 +34,6 @@
     <Compile Include="Paginate.py" />
     <Compile Include="Parse.py" />
     <Compile Include="pygeocoder.py" />
-    <Compile Include="Standardize.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\3.4" />
@@ -47,6 +46,7 @@
     </WebPiReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="orange.yaml" />
     <Content Include="OrangeMaster.mdbmodel" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Python Tools\Microsoft.PythonTools.Django.targets" />
