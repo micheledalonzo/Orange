@@ -1,0 +1,13 @@
+prd:
+    MySqlSvr: 54.77.219.201
+    MySqlUsr: 'orange'
+    MySqlPsw: '5Q34jMBDy88ec8dc'
+    MySqlDb: orange
+    MsAccDsn: 'DSN=Orange'    
+tst:
+    MySqlSvr: 'localhost'
+    MySqlUsr: 'root'
+    MySqlPsw: ''
+    MySqlDb: orange    
+    MsAccDsn: 'DSN=OrangeTest'
+
