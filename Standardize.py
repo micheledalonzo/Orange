@@ -13,8 +13,10 @@ try:
     rc = gL.ParseArgs()
     #---------------------------------------------- M A I N ------------------------------------------------
     # apri connessione e cursori, carica keywords in memoria
-    gL.SqLite, gL.C = gL.OpenConnectionSqlite()
-    gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)   
+    rc = gL.OpenDb()
+    if not rc:
+        print("Error in opening db")
+        return False   
     runid = gL.Restart(me)
     if not gL.restart:
         gL.RunId = gL.RunIdCreate(me)
@@ -27,8 +29,8 @@ try:
     # creo la tabella in memoria
     rc = gL.dbCreateMemTableMemAsset()
     rc = gL.CopyAssetInMemory()
-    gL.cSql.execute("Select * from QAddress order by name")
-    rows = gL.cSql.fetchall()
+    gL.cMySql.execute("Select * from QAddress order by name")
+    rows = gL.cMySql.fetchall()
     gL.T_Ass = len(rows)
     msg=('RUN %s: STDIZE %s Assets' % (gL.RunId, gL.T_Ass))
     gL.log(gL.INFO, msg)
@@ -47,7 +49,6 @@ try:
         AAsset = gL.dbAAsset(Asset, AssetMatch, AssetRef)   
         # cerco le info sull'asset in Google        
         #gAsset = gL.ParseGooglePlacesMain(Asset, AAsset)
-        gL.cSql.commit()
         #if gL.N_Ass > 100:
         #    break
     # chiudi DB

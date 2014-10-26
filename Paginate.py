@@ -30,7 +30,7 @@ def BuildAssetList(country, assettype, source, starturl, pageurl, runlogid):
             msg ="%s - %s" % ("PAGINATE", pageurl)
             gL.log(gL.INFO, msg)
             if newpage == '':
-                page = gL.ReadPage(pageurl)
+                rc, page = gL.ReadPage(pageurl)
             else:
                 page = newpage
             if page is not None:
@@ -40,7 +40,6 @@ def BuildAssetList(country, assettype, source, starturl, pageurl, runlogid):
                 rc = gL.BuildQueue(country, assettype, source, starturl, pageurl, page)
                 # aggiorna il log del run con la data di fine esame della pagina
                 gL.PagesStatus("END", country, assettype, source, starturl, pageurl)
-                gL.cSql.commit()                
                 # legge la prossima pagina lista                
                 newpageurl, newpage = gL.ParseNextPage(source, assettype, country, pageurl, page)
                 if newpageurl:
@@ -58,24 +57,24 @@ def RestartPaginate():
     if gL.trace: gL.log(gL.DEBUG)   
     try:        
         
-        gL.cSql.execute("SELECT * from QPagesRestart")   # rileggo tutti i record della tabella pages che non sono stati completati e li processo nuovamente
-        check = gL.cSql.fetchall() 
+        gL.cMySql.execute("SELECT * from QPagesRestart")   # rileggo tutti i record della tabella pages che non sono stati completati e li processo nuovamente
+        check = gL.cMySql.fetchall() 
         gL.T_Ass = len(check)
         msg=('RUN %s: RESTART PARSING, %s Assets IN QUEUE' % (gL.RunId, gL.T_Ass))                
         gL.log(gL.INFO, msg)
         for log in check:
-            gL.assetbaseurl = log['drivebaseurl']  
-            language        = log['countrylanguage']  
-            gL.currency     = log['countrycurr']
-            gL.sourcebaseurl= log['sourcebaseurl']    
-            source          = log['source']
-            sourcename      = log['sourcename']                
-            assettypename   = log['assettypename']                
-            assettype       = log['assettype']
-            country         = log['country']
-            starturl        = log['starturl']
-            pageurl         = log['ultimodipageurl']        
-            SetLocaleString = log['setlocalestring']        
+            gL.assetbaseurl = log['DriveBaseUrl']  
+            language        = log['CountryLanguage']  
+            gL.currency     = log['CountryCurr']
+            gL.SourceBaseUrl= log['SourceBaseUrl']    
+            source          = log['Source']
+            #sourcename      = log['SourceName']                
+            #assettypename   = log['AssetTypeName']                
+            assettype       = log['AssetType']
+            country         = log['Country']
+            starturl        = log['StartUrl']
+            pageurl         = log['PageUrl']        
+            SetLocaleString = log['SetLocaleString']        
             # gestione della lingua per l'interpretazione delle date
             if not SetLocaleString:
                 gL.log(gL.ERROR, "SetLocaleString non settata in QDrive")
@@ -83,10 +82,10 @@ def RestartPaginate():
             locale.setlocale(locale.LC_TIME, SetLocaleString)  
               
             # stampo i parametri di esecuzione
-            msg=('RESTART PAGINAZIONE: RUN: %s SOURCE: %s ASSET: %s COUNTRY: %s RESTART: %s' % (gL.RunId, sourcename, assettypename, country, gL.restart))
+            msg=('RESTART PAGINAZIONE: RUN: %s SOURCE: %s ASSET: %s COUNTRY: %s RESTART: %s' % (gL.RunId, source, assettype, country, gL.restart))
             gL.log(gL.INFO, msg)
 
-            page = gL.ReadPage(pageurl)  # rileggo l'ultima pagina con data di start massima
+            rc, page = gL.ReadPage(pageurl)  # rileggo l'ultima pagina con data di start massima
             if page is not None:
                 newpageurl, newpage = gL.ParseNextPage(source, assettype, country, pageurl, page)  # leggo se esiste la prossima pagina 
                 if newpageurl:
@@ -108,13 +107,13 @@ def NormalPaginate():
     if gL.trace: gL.log(gL.DEBUG)   
     try:    
         for drive in gL.Drive:              # inserisco gli starturl nel run
-            country = drive['country']  
-            source = drive['source']
-            assettype = drive['assettype']
-            language = drive['countrylanguage']     
-            starturl = drive['starturl']     
+            country = drive['Country']  
+            source = drive['Source']
+            assettype = drive['AssetType']
+            language = drive['CountryLanguage']     
+            starturl = drive['StartUrl']     
             pageurl = starturl        
-            SetLocaleString = drive['setlocalestring']
+            SetLocaleString = drive['SetLocaleString']
             # gestione della lingua per l'interpretazione delle date
             if not SetLocaleString:          
                 gL.log(gL.ERROR, "SetLocaleString non settata in QDrive")
@@ -122,27 +121,27 @@ def NormalPaginate():
             locale.setlocale(locale.LC_TIME, SetLocaleString)  
         
             # se richiesto cancello e ricreo la coda, ma solo per le righe dipendenti dallo starturl            
-            gL.cSql.execute("Delete * from queue where source = ? and AssetType = ? and Country = ? and StartUrl = ?", (source, assettype, country, starturl))           
-            gL.cSql.execute("Delete * from pages where source = ? and AssetType = ? and Country = ? and StartUrl = ?", (source, assettype, country, starturl))
+            gL.cMySql.execute("Delete from queue where source = %s and AssetType = %s and Country = %s and StartUrl = %s", (source, assettype, country, starturl))           
+            gL.cMySql.execute("Delete from pages where source = %s and AssetType = %s and Country = %s and StartUrl = %s", (source, assettype, country, starturl))
            
             # metto in tabella Pages tutti gli starturl che devo fare            
             rc = gL.PagesCreate(source, assettype, country, starturl, pageurl)    
-            gL.cSql.commit()
+
         
         for drive in gL.Drive:     # leggo ogni record del drive e ricostruisco la coda 
-            gL.assetbaseurl = drive['drivebaseurl']  # il baseurl per la tipologia di asset
-            language = drive['countrylanguage']  # lingua
-            country = drive['country']  # paese
-            source = drive['source']
-            assettype = drive['assettype']
+            gL.assetbaseurl = drive['DriveBaseUrl']  # il baseurl per la tipologia di asset
+            language = drive['CountryLanguage']  # lingua
+            country = drive['Country']  # paese
+            source = drive['Source']
+            assettype = drive['AssetType']
             sourcename = drive['sourcename']
-            gL.currency = drive['countrycurr']
-            assettypename = drive['assettypename']
-            rundate = drive['rundate']
-            rundate_end = drive['rundate_end']
-            starturl = drive['starturl']     
+            gL.currency = drive['CountryCurr']
+            assettypename = drive['AssetTypeName']
+            rundate = drive['RunDate']
+            rundate_end = drive['RunDate_End']
+            starturl = drive['StartUrl']     
             pageurl = starturl            
-            gL.sourcebaseurl = drive['sourcebaseurl']                        
+            gL.SourceBaseUrl = drive['SourceBaseUrl']                        
         
             msg=('RUN: %s SOURCE: %s ASSET: %s COUNTRY: %s STARTURL: %s' % (gL.RunId, sourcename, assettypename, country, starturl))
             gL.log(gL.INFO, msg)
@@ -165,14 +164,16 @@ def Main():
         rc = gL.ParseArgs()
         #---------------------------------------------- M A I N ------------------------------------------------
         # apri connessione e cursori, carica keywords in memoria
-        gL.SqLite, gL.C = gL.OpenConnectionSqlite()
-        gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)           
+        rc = gL.OpenDb()
+        if not rc:
+            print("Error in opening db")
+            return False
         gL.restart == False
         runid = gL.Restart(me)
-        rc = gL.SetLogger(me, gL.RunId, gL.restart)     
-        gL.log(gL.INFO, gL.Args)       
         if  gL.restart == True:            
-            gL.RunId = runid    
+            gL.RunId = runid            
+            rc = gL.SetLogger(me, gL.RunId, gL.restart)     
+            gL.log(gL.INFO, gL.Args)       
             rc = gL.RunInit()
             if not rc:
                 gL.log(gL.ERROR, "RunInit errato")                    
@@ -184,23 +185,22 @@ def Main():
                 #chiudo le tabelle dei run
                 rc = gL.RunIdStatus("END")
                 rc = gL.UpdDriveRun("END")
-                gL.cSql.commit()                                    
     
         # run normale
         if gL.restart == False:
             # controllo la tabella Drive e la leggo
-            gL.cSql.execute("SELECT * FROM QDrive ORDER BY rnd(starturlid)")
-            gL.Drive = gL.cSql.fetchall()
+            gL.cMySql.execute("SELECT * FROM QDrive ORDER BY rand()")
+            gL.Drive = gL.cMySql.fetchall()
             if len(gL.Drive) == 0:
-                gL.log(gL.WARNING, "Nessun run da eseguire")
+                print("Nessun run da eseguire")
             else:
                 gL.RunId = gL.RunIdCreate(me)
+                rc = gL.SetLogger("PGN", gL.RunId, gL.restart)
+                if not rc:
+                    print("SetLogger errato")
                 rc = gL.RunIdStatus("START")  
                 if not rc:
                     gL.log(gL.ERROR, "RunId errato")        
-                rc = gL.SetLogger("PGN", gL.RunId, gL.restart)
-                if not rc:
-                    gL.log(gL.ERROR, "SetLogger errato")        
                 gL.log(gL.WARNING, "Proxy:"+str(gL.Useproxy))    
                 rc = gL.RunInit()    
                 if not rc:
@@ -211,7 +211,7 @@ def Main():
                 else:
                     #chiudo le tabelle dei run
                     rc = gL.RunIdStatus("END")                
-                    gL.cSql.commit()    
+
             
         # chiudi DB
         gL.CloseConnectionMySql()

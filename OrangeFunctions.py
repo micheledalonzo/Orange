@@ -34,11 +34,11 @@ def ParseArgs():
     args = parser.parse_args()
     if args.test:
         gL.testrun = True
-        gL.Dsn = gL.DsnTest
+        gL.Dsn = gL.Tst_MsAccDsn
         print("RUN DI TEST!!!!")
     else:
         gL.testrun = False
-        gL.Dsn = gL.DsnProd
+        gL.Dsn = gL.Prd_MsAccDsn
         print("RUN EFFETTIVO")
     if args.testurl:
         gL.testurl = args.testurl
@@ -54,33 +54,37 @@ def ParseArgs():
     return True
 
 def Restart(RunType):
-    if gL.trace: gL.log(gL.DEBUG)   
-    gL.restart = False
-    # determino se devo restartare - prendo l'ultimo record della tabella run    
-    gL.cSql.execute("SELECT RunId, Start, End FROM Run where RunType = ? GROUP BY RunId, Start, End ORDER BY RunId DESC", ([RunType]))
-    check = gL.cSql.fetchone()
-    if check:   # se esiste un record in Run
-        runid = check['runid']
-        end   = check['end']
-        start = check['start']
-        if end is None or end < start:
-            gL.restart = True
-            return runid
-    return 0
+    try:
+        if gL.trace: gL.log(gL.DEBUG)   
+        gL.restart = False
+        # determino se devo restartare - prendo l'ultimo record della tabella run    
+        gL.cMySql.execute("SELECT RunId, Start, End FROM Run where RunType = %s GROUP BY RunId, Start, End ORDER BY RunId DESC", ([RunType]))
+        check = gL.cMySql.fetchone()
+        if check:   # se esiste un record in Run
+            runid = check['RunId']
+            end   = check['End']
+            start = check['Start']
+            if end is None or end < start:
+                gL.restart = True
+                return runid
+        return 0
+
+    except Exception as err:
+        return False
 
 def RunInit():
     if gL.trace: gL.log(gL.DEBUG)        
     
     try:
-        rc = gL.dbCreateMemTableKeywords()
-        rc = gL.CopyKeywordsInMemory()
+        #rc = gL.CreateMemTableKeywords()
+        #rc = gL.CopyKeywordsInMemory()
         rc = gL.LoadProxyList()
         if not rc:       
             gL.Useproxy = False        
     
         # fill lista delle funzioni per il trattamento delle pagine
-        gL.cSql.execute("select source, assettype, country, NextPageFn, QueueFn, ParseFn from Drive")
-        gL.Funzioni = gL.cSql.fetchall()
+        gL.cMySql.execute("select source, assettype, country, NextPageFn, QueueFn, ParseFn from Drive")
+        gL.Funzioni = gL.cMySql.fetchall()
         # controllo la congruenza
         if not gL.OkParam():
             return False        
@@ -124,10 +128,10 @@ def StdPhone(stringa, country):
     
         ISO = gL.CountryISO.get(country) 
         if ISO is None:
-            gL.cSql.execute("select CountryISO2 from T_Country where Country = ?", ([country]))
-            row = gL.cSql.fetchone()
+            gL.cMySql.execute("select CountryIso2 from T_Country where Country = %s", ([country]))
+            row = gL.cMySql.fetchone()
             if row:
-                ISO = row['countryiso2']           
+                ISO = row['CountryIso2']           
                 gL.CountryISO[country] = ISO
 
         if ISO is None:
@@ -166,15 +170,19 @@ def StdPhone(stringa, country):
 
 def GetFunzione(tipo, source, assettype, country):
     if gL.trace: gL.log(gL.DEBUG)   
-    for k in gL.Funzioni:
-        if k['source'] == source and k['assettype'] == assettype and k['country'] == country: 
-            if tipo == "PARSE":
-                return k['parsefn']
-            if tipo == "QUEUE":
-                return k['queuefn']
-            if tipo == "NEXT":
-                return k['nextpagefn']
-    return False
+    try:
+        for k in gL.Funzioni:
+            if k['source'] == source and k['assettype'] == assettype and k['country'] == country: 
+                if tipo == "PARSE":
+                    return k['ParseFn']
+                if tipo == "QUEUE":
+                    return k['QueueFn']
+                if tipo == "NEXT":
+                    return k['NextPageFn']
+    except Exception as err:
+        gL.log(gL.ERROR, err)
+        return False
+
 
 def StdZip(stringa):   
     stringa = gL.StdCar(stringa) 

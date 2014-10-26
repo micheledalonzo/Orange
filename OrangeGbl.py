@@ -2,10 +2,10 @@
 import logging
 from OrangeDb import *
 from OrangeFunctions import *
-from OrangeNames import *
 from OrangeParse import *
 import difflib
 import pypyodbc
+import pymysql
 import datetime
 import re
 import inspect
@@ -16,8 +16,8 @@ import sys
 import pprint
 import traceback
 import sys
-
 import locale
+import yaml
 locale.setlocale(locale.LC_ALL, '')
 
 # init var
@@ -38,19 +38,18 @@ RunDate         = SetNow()
 GmapNumcalls    = 0
 count           = 0
 i               = 0
-DsnProd         = 'DSN=Orange'
-DsnTest         = 'DSN=OrangeTest'
-Dsn             = ''
 testurl         = ''
-sourcebaseurl   = ""
+SourceBaseUrl   = ""
 assetbaseurl    = ""
-MySql           = None
-cSql            = None   #
-SqLite          = None   # connection
-cLite           = None   # cursore sqlite
+MsAcc           = None   # Access
+cMsAcc          = None 
+MySql           = None   # MySql
+cMySql          = None
+SqLite          = None   # Sqlite
+cLite           = None   # 
 RunId           = 0
 # database flag YES/NO
-YES             = -1
+YES             = 1
 NO              = 0
 TRUE            = 1
 FALSE           = 0
@@ -58,15 +57,20 @@ resetnames      = False
 restart         = False
 currency        = ""
 
-preposizioni  = ["il","lo","l'","la","i","gli","le", "di","del","dello","dell'","della","dei","degli","delle","a","al",\
-                 "allo","all'","alla","ai","agli","alle","da","dal","dallo","dall'","dalla","dai","dagli","dalle","in","nel",\
-                 "nello","nell'","nella","nei","negli","nelle","su","sul","sullo","sull'","sulla","sui","sugli","sulle"]
-pronomi       = ["io", "me", "mi", "tu", "te", "ti","egli","ella","lui","lei","lo","la","esso","essa","esso","essa","gli",\
-                 "le","ne","noi","ci","voi","vi","essi","esse","loro","li","le","essi","esse","ne","ne","quale", "che", "quali", "cui"]
-punteggiatura = [".", ",", ";", ":", "?", "!", "?!", "...", "\"", "'", "<", ">", "-", "(", ")", "[", "]", "*"]
-congiunzioni =  ["&","pure", "inoltre", "ancora", "altresì", "ma", "però", "pure", "mentre", "anzi", "invece", "tuttavia", "dunque", "però",\
-                 "quindi", "ondeperciò", "pertanto", "ebbene", "laondee", "pure", "né","inoltre", "ancora", "neppure", "neanche", "nemmeno", \
-                 "e", "né", "o", "come", "così","sia", "che","quanto", "quale", "difatti", "cioè", "invero", "ossiaossia", "ovvero", "oppure"]
+import yaml
+f = open('c:\orange\orange.yaml')
+d = yaml.load(f)
+Prd_MsAccDsn = d['prd']['MsAccDsn']
+Prd_MySqlDb  = d['prd']['MySqlDb']
+Prd_MySqlSvr = d['prd']['MySqlSvr']
+Prd_MySqlUsr = d['prd']['MySqlUsr']
+Prd_MySqlPsw = d['prd']['MySqlPsw']
+Tst_MsAccDsn = d['tst']['MsAccDsn']
+Tst_MySqlDb  = d['tst']['MySqlDb']
+Tst_MySqlSvr = d['tst']['MySqlSvr']
+Tst_MySqlUsr = d['tst']['MySqlUsr']
+Tst_MySqlPsw = d['tst']['MySqlPsw']
+f.close()
    
 INFO     = logging.INFO
 CRITICAL = logging.CRITICAL
@@ -156,6 +160,6 @@ def log(level, *message):
             line = linecache.getline(filename, lineno)
             logger.error("--> Riga:%d - %s" % (lineno, line.strip()))
             #for line in pprint.pformat(stack_trace[:-1]).split('\n'):
-            for line in stack_trace:
-                logging.error(line.replace("\n",""))
+            #for line in stack_trace:  # per avere tutto lo stack
+            #    logging.error(line.replace("\n",""))
         

@@ -91,20 +91,20 @@ def ReadPage(url, timetowait=5):
                 page = requests.get(url, timeout=2)  
             page.raise_for_status()       
             #rc = gL.SaveContent(url, page.text)            
-            return html.fromstring(page.content)
+            return 0, html.fromstring(page.content)
         except requests.exceptions.HTTPError as e:
             status_code = e.response.status_code
             msg ="HTTP %s - %s" % (status_code, url)
             gL.log(gL.WARNING, msg)
-            if status_code == 500 or status_code == 502:
+            if status_code == 500 or status_code == 502 or status_code == 503:
                 if n > max: 
                     gL.log(gL.WARNING, "FINE MAX TENTATIVI DI LETTURA PER URL=" + url + "STATUS=" + str(status_code))
                     break
                 else:
                     continue
-            else:
+            else:                
                 gL.log(gL.WARNING, "HTTP=" + str(status_code) + "url=" + url)
-                break   
+                return status_code, None   
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:            
             n = n + 1
             if n > max:
@@ -120,7 +120,7 @@ def ReadPage(url, timetowait=5):
             gL.log(gL.ERROR, url)
             break
 
-    return None
+    return 12, None
 
 def NextpageTripadvisor(url, page):
     if gL.trace: gL.log(gL.DEBUG)   
@@ -134,8 +134,8 @@ def NextpageTripadvisor(url, page):
              # link = gL.assetbaseurl + link
              # controllo che esista e l'inserisco nella coda
              url = gL.assetbaseurl + link
-             newpage = ReadPage(url) 
-             if newpage is not None:
+             rc, newpage = ReadPage(url) 
+             if rc == 0 and newpage is not None:
                 return url, newpage
                             
     except Exception as err:
@@ -156,8 +156,8 @@ def NextpageDuespaghi(url, page):
             nx = int(found) + 1
             url_a = "http://" + o.hostname + o.path + "?pag=" + str(nx) + "&ord=relevance&dir=desc"
         # controlla che esista
-        page = ReadPage(url_a)
-        if page is None:            
+        rc, page = ReadPage(url_a)
+        if rc == 0 and page is None:            
             return False, ''
         test = page.xpath('//*[@class="row-identity-container"]/a/@href')  # le pagine esistono ma non hanno contenuto
         if page is not None and test:
@@ -166,8 +166,8 @@ def NextpageDuespaghi(url, page):
     except Exception as err:
         url_a = "http://" + o.hostname + o.path + "?pag=2&ord=relevance&dir=desc"  # se non trovo il numero pagina vuol dire che è la prima pagina, 
         # controlla che esista
-        newpage = ReadPage(url_a)
-        if newpage is not None:
+        rc, newpage = ReadPage(url_a)
+        if rc == 0 and newpage is not None:
             test = newpage.xpath('//*[@class="row-identity-container"]/a/@href')  # controllo che la seconda esista con del contenuto
             if test:
                 return url_a, newpage
@@ -192,8 +192,8 @@ def NextpageViamichelin(url, page):
                 nx = int(found) + 1
                 url_a = "http://" + o.hostname + o.path + "?page=" + str(nx) 
             # controlla che esista
-            newpage = ReadPage(url_a)
-            if newpage is not None:                
+            rc, newpage = ReadPage(url_a)
+            if rc == 0 and newpage is not None:                
                 test = newpage.xpath('//div[@id="noResult"]')  # le pagine esistono ma non hanno contenuto
                 if len(test) == 0:
                     return url_a, newpage
@@ -203,8 +203,8 @@ def NextpageViamichelin(url, page):
         except Exception as err:
             url_a = "http://" + o.hostname + o.path + "?page=2"  # se non trovo il numero pagina vuol dire che è la prima pagina, 
             # controlla che esista
-            newpage = ReadPage(url_a)
-            if newpage is not None:
+            rc, newpage = ReadPage(url_a)
+            if rc == 0 and newpage is not None:
                 test = newpage.xpath('//div[@id="noResult"]')  # controllo che la seconda esista con del contenuto (questo è il messaggio "No result"
                 if len(test) == 0:
                     return url_a, newpage
@@ -232,7 +232,7 @@ def NextpageQristoranti(url, page):
         numpa = page.xpath('//a[@class="paginate"]/text()')
         if numpa[0] is not None:
             if int(numpa[0]) > int(curpa):
-                newpage = ReadPage(links[0])
+                rc, newpage = ReadPage(links[0])
                 if newpage is not None:
                     return(links[0], newpage)
                 else:
@@ -252,9 +252,13 @@ def ParseTripadvisor(country, url, name, Asset):
 
     try:
         # leggi la pagina di contenuti
-        content = ReadPage(url)
-        if content is  None:
-            return False
+        rc, content = ReadPage(url)
+        if content is None:
+            if rc == 404:
+                gL.cMySql.execute("Update Asset set Active=%s, Updated=%s where Asset=%s", (0, gL.SetNow(), Asset))
+                return True
+            else:
+                return False
 
         LastReviewDate = content.xpath('//span[@class="ratingDate"]/text()')  # la prima che trovo e' la piu' recente
         if LastReviewDate:
@@ -385,17 +389,17 @@ def ParseTripadvisor(country, url, name, Asset):
 def ParseGooglePlacesMain(Asset, AAsset):
     if gL.trace: gL.log(gL.DEBUG)   
     try:        
-        gL.cSql.execute("Select * from QAddress where Asset = ?", ([Asset]))
-        row = gL.cSql.fetchone()
+        gL.cMySql.execute("Select * from QAddress where Asset = %s", ([Asset]))
+        row = gL.cMySql.fetchone()
         if not row:
             gL.log(gL.ERROR, "asset:" + str(Asset))
             return False           
        
-        country     = row['country']
-        assettype   = row['assettype']
-        source      = row['source']
-        starturl    = row['starturl']
-        asseturl    = row['asseturl']
+        country     = row['Country']
+        assettype   = row['AssetType']
+        source      = row['Source']
+        starturl    = row['StartUrl']
+        asseturl    = row['AssetUrl']
         name        = row['name']
         address     = row['address']
         addrstreet  = row['addrstreet']
@@ -638,13 +642,14 @@ def ParseDuespaghi(country, url, name, Asset):
     if gL.trace: gL.log(gL.DEBUG)   
 
     try:    
-
-        # leggi la pagina di contenuti
-        content = ReadPage(url)
-    
+        rc, content = ReadPage(url)
         if content is None:
-            return False
-
+            if rc == 404:
+                gL.cMySql.execute("Update Asset set Active=%s, Updated=%s where Asset=%s", (0, gL.SetNow(), Asset))
+                return True
+            else:
+                return False
+ 
         LastReviewDate = content.xpath('//div[@class="metadata-text pull-left"]/text()')  # la prima che trovo e' la piu' recente
         if LastReviewDate:
             LastReviewDate = gL.StdCar(LastReviewDate[0])
@@ -762,11 +767,13 @@ def ParseViamichelin(country, url, name, Asset):
     if gL.trace: gL.log(gL.DEBUG)   
         
     try:    
-
-        # leggi la pagina di contenuti
-        content = ReadPage(url)
-        if content is  None:
-            return False
+        rc, content = ReadPage(url)
+        if content is None:
+            if rc == 404:
+                gL.cMySql.execute("Update Asset set Active=%s, Updated=%s where Asset=%s", (0, gL.SetNow(), Asset))
+                return True
+            else:
+                return False
     
         #LastReviewDate = content.xpath('//span[@class="ratingDate"]/text()')  # la prima che trovo e' la piu' recente
         #if LastReviewDate:
@@ -776,7 +783,7 @@ def ParseViamichelin(country, url, name, Asset):
         #    LastReviewDate = datetime.datetime.strptime(LastReviewDate, '%d %B %Y')
         #    # aggiorno la data di ultima recensione sulla tabella asset del source
         #    if LastReviewDate != CurAssetLastReviewDate:
-        #        gL.cSql.execute("Update Asset set LastReviewDate=? where Asset=?", (LastReviewDate, Asset))
+        #        gL.cMySql.execute("Update Asset set LastReviewDate=? where Asset=?", (LastReviewDate, Asset))
         indirizzo = ''
         addr = content.xpath('//li[@class="vm-clear"]//li//text()')
         for add in addr:
@@ -876,9 +883,13 @@ def ParseQristoranti(country, url, name, Asset):
     if gL.trace: gL.log(gL.DEBUG)   
     try:
         # leggi la pagina di contenuti
-        content = ReadPage(url)
+        rc, content = ReadPage(url)
         if content is None:
-            return False
+            if rc == 404:
+                gL.cMySql.execute("Update Asset set Active=%s, Updated=%s where Asset=%s", (0, gL.SetNow(), Asset))
+                return True
+            else:
+                return False
 
         cerca = content.xpath('//div[@class="reviewInfo"]/text()')  # la prima che trovo e' la piu' recente
         LastReviewDate = ''
@@ -957,7 +968,7 @@ def ParseQristoranti(country, url, name, Asset):
         y = content.xpath('//td[contains(., "Fascia di prezzo")]/following-sibling::td/text()')
         if len(y)>0:
             x = y[0]
-        x = gL.StdCar(x)
+            x = gL.StdCar(x)
         PriceFrom = PriceTo = PriceAvg = 0
         if x is not None:
             if x == "bassa":
@@ -1011,10 +1022,10 @@ def QueueTripadvisor(country, assettype, source, starturl, pageurl, page):
         # leggi la lista e inserisci asset
         lista = page.xpath('//*[@class="listing" or @class="listing first"]')
         for asset in lista:
-            name = asset.xpath('.//*[@class="property_title"]//text()')[0]
+            name = asset.xpath('.//*[@class="property_title "]//text()')[0]
             name = gL.StdName(name)
-            url  = asset.xpath('.//a[contains(@class,"property_title")]/@href')[0]
-            url  = gL.sourcebaseurl + url
+            url  = asset.xpath('.//a[contains(@class,"property_title ")]/@href')[0]
+            url  = gL.SourceBaseUrl + url
             # inserisci o aggiorna l'asset        
             rc = gL.dbEnqueue(country, assettype, source, starturl, pageurl, url, name)
 
@@ -1051,7 +1062,7 @@ def QueueDuespaghi(country, assettype, source, starturl, pageurl, page):
                 continue 
             name = gL.StdName(nomi[n])
         
-            url  = gL.sourcebaseurl + href[n]
+            url  = gL.SourceBaseUrl + href[n]
                
             rc = gL.dbEnqueue(country, assettype, source, starturl, pageurl, url, name)
             n = n + 1  # next asset
@@ -1088,7 +1099,7 @@ def QueueViamichelin(country, assettype, source, starturl, pageurl, page):
             if not href[n]:
                 continue 
             name = gL.StdName(nomi[n])        
-            url  = gL.sourcebaseurl + href[n]               
+            url  = gL.SourceBaseUrl + href[n]               
             rc = gL.dbEnqueue(country, assettype, source, starturl, pageurl, url, name)
             n = n + 1  # next asset
 

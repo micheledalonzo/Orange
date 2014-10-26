@@ -45,44 +45,37 @@ def ParseAsset(country, assettype, source, starturl, pageurl, asseturl, name):
     if gL.trace: gL.log(gL.DEBUG)   
     # parse delle singole pagine degli asset
     gL.dbQueueStatus("START", country, assettype, source, starturl, pageurl, asseturl) # scrivo nella coda che inizio
-    Asset = gL.ParseContent(country, assettype, source, starturl, asseturl, name)                                                                      
+    Asset = gL.ParseContent(country, assettype, source, starturl, asseturl, name)                           
     if Asset:  # se tutto ok
-        gL.cSql.commit()
-        # sposto tutto in una funzione a se stante asincrona
-        #AssetMatch, AssetRef = gL.StdAsset(Asset)   # controllo se esiste gia' un asset simile
-        #if AssetMatch is False: # is evita che 0 sia interpretato come false
-        #    gL.log(gL.WARNING, "StdAsset ha restituito False", asseturl)
-        #    gL.dbQueueStatus("END", country, assettype, source, starturl, pageurl, asseturl) # scrivo nella coda che ho finito
-        #    return True
-        #AAsset = gL.dbAAsset(Asset, AssetMatch, AssetRef)   # creo il record in AAsset a partire da SourceAsseId corrente con riferimento al suo simile oppure lo aggiorno
         gL.dbQueueStatus("END", country, assettype, source, starturl, pageurl, asseturl) # scrivo nella coda che ho finito
-        gL.cSql.commit()
+    else:
+        return False                                           
     return True
 
 def RestartParse():
     if gL.trace: gL.log(gL.DEBUG)   
     try:        
-        gL.cSql.execute("SELECT * from QParseRestart ORDER BY rnd(queueid)")
-        check = gL.cSql.fetchall()   # l'ultima
+        gL.cMySql.execute("SELECT * from QParseRestart ORDER BY rand()")
+        check = gL.cMySql.fetchall()   # l'ultima
         gL.T_Ass = len(check)
         msg=('RUN %s: RESTART PARSING, %s Assets IN QUEUE' % (gL.RunId, gL.T_Ass))                
         gL.log(gL.INFO, msg)
         if gL.T_Ass > 0:      
             for row in check:
-                gL.assetbaseurl = row['drivebaseurl']  # il baseurl per la tipologia di asset
-                language        = row['countrylanguage']  # lingua                                                               
-                gL.currency     = row['countrycurr']
-                gL.sourcebaseurl= row['sourcebaseurl']    
-                source          = row['source']
-                name            = row['nome']
-                sourcename      = row['sourcename']                
-                assettypename   = row['assettypename']                
-                assettype       = row['assettype']
-                country         = row['country']
-                starturl        = row['starturl']
-                asseturl        = row['asseturl']
-                pageurl         = row['pageurl']        
-                SetLocaleString = row['setlocalestring']        
+                gL.assetbaseurl = row['DriveBaseUrl']  # il baseurl per la tipologia di asset
+                language        = row['CountryLanguage']  # lingua                                                               
+                gL.currency     = row['CountryCurr']
+                gL.SourceBaseUrl= row['SourceBaseUrl']    
+                source          = row['Source']
+                name            = row['Nome']
+                #sourcename      = row['SourceName']                
+                #assettypename   = row['AssetTypeName']                
+                assettype       = row['AssetType']
+                country         = row['Country']
+                starturl        = row['StartUrl']
+                asseturl        = row['AssetUrl']
+                pageurl         = row['PageUrl']        
+                SetLocaleString = row['SetLocaleString']        
                 # gestione della lingua per l'interpretazione delle date
                 if not SetLocaleString:
                     gL.log(gL.ERROR, "SetLocaleString non settata in QDrive")
@@ -104,28 +97,28 @@ def NormalParse():
     if gL.trace: gL.log(gL.DEBUG)   
     try:
         # ---------------- messaggio con totale asset da esaminare
-        gL.cSql.execute("SELECT * FROM QQueue")
-        rows = gL.cSql.fetchall()
+        gL.cMySql.execute("SELECT * FROM Qqueue")  
+        rows = gL.cMySql.fetchall()
         gL.T_Ass = str(len(rows))       
         msg=('RUN %s: PARSING %s Assets' % (gL.RunId, gL.T_Ass))
         gL.log(gL.INFO, msg)
 
         gL.N_Ass = 0
         for row in rows:                        
-            gL.assetbaseurl = row['drivebaseurl']  # il baseurl per la tipologia di asset
-            language        = row['countrylanguage']  # lingua                                                               
-            gL.currency     = row['countrycurr']
-            gL.sourcebaseurl= row['sourcebaseurl']    
-            source          = row['source']
-            name            = row['nome']
-            sourcename      = row['sourcename']                
-            assettypename   = row['assettypename']                
-            assettype       = row['assettype']
-            country         = row['country']
-            starturl        = row['starturl']
-            asseturl        = row['asseturl']
-            pageurl         = row['pageurl']        
-            SetLocaleString = row['setlocalestring']        
+            gL.assetbaseurl = row['DriveBaseUrl']  # il baseurl per la tipologia di asset
+            language        = row['CountryLanguage']  # lingua                                                               
+            gL.currency     = row['CountryCurr']
+            gL.SourceBaseUrl= row['SourceBaseUrl']    
+            source          = row['Source']
+            name            = row['Nome']
+            sourcename      = row['SourceName']                
+            assettypename   = row['AssetTypeName']                
+            assettype       = row['AssetType']
+            country         = row['Country']
+            starturl        = row['StartUrl']
+            asseturl        = row['AssetUrl']
+            pageurl         = row['PageUrl']        
+            SetLocaleString = row['SetLocaleString']        
             # gestione della lingua per l'interpretazione delle date
             if not SetLocaleString:
                 gL.log(gL.ERROR, "SetLocaleString non settata in QDrive")
@@ -150,8 +143,12 @@ def Main():
         rc = gL.ParseArgs()
         #---------------------------------------------- M A I N ------------------------------------------------
         # apri connessione e cursori, carica keywords in memoria
-        gL.SqLite, gL.C = gL.OpenConnectionSqlite()
-        gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)   
+        #gL.SqLite, gL.C = gL.OpenConnectionSqlite()
+        #gL.MySql, gL.Cursor = gL.OpenConnectionMySql(gL.Dsn)   
+        rc = gL.OpenDb()
+        if not rc:
+            print("Error in opening db")
+            return False
         gL.restart == False
         runid = gL.Restart(me)
         rc = gL.SetLogger(me, gL.RunId, gL.restart)            
@@ -170,24 +167,23 @@ def Main():
             else:
                 #chiudo le tabelle dei run
                 rc = gL.RunIdStatus("END")
-                rc = gL.UpdDriveRun("END")
-                gL.cSql.commit()                                    
+                rc = gL.UpdDriveRun("END")                
     
         # run normale
         if gL.restart == False:
             # controllo la tabella Drive e la leggo
-            gL.cSql.execute("SELECT * FROM QDrive ORDER BY rnd(starturlid)")
-            gL.Drive = gL.cSql.fetchall()
+            gL.cMySql.execute("SELECT * FROM QDrive ORDER BY rand()")
+            gL.Drive = gL.cMySql.fetchall()
             if len(gL.Drive) == 0:
                 print("Nessun run da eseguire")
             else:
                 gL.RunId = gL.RunIdCreate(me)
+                rc = gL.SetLogger(me, gL.RunId, gL.restart)
+                if not rc:
+                    print("SetLogger errato")
                 rc = gL.RunIdStatus("START")  
                 if not rc:
                     gL.log(gL.ERROR, "RunId errato")        
-                rc = gL.SetLogger(me, gL.RunId, gL.restart)
-                if not rc:
-                    gL.log(gL.ERROR, "SetLogger errato")        
                 gL.log(gL.WARNING, "Proxy:"+str(gL.Useproxy))    
                 rc = gL.RunInit()    
                 if not rc:
@@ -195,11 +191,10 @@ def Main():
                 
                 rc = NormalParse()              # -------------------RUN------------------------------------
                 if not rc:   
-                    gL.log(gL.ERROR, "Run terminato in modo errato")        
+                    return False
                 else:
                     #chiudo le tabelle dei run
                     rc = gL.RunIdStatus("END")                
-                    gL.cSql.commit()    
             
         # chiudi DB
         gL.CloseConnectionMySql()
