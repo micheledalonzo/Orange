@@ -125,13 +125,13 @@ def PagesCreate(source, assettype, country, starturl, pageurl):
     try:
         if pageurl == None or pageurl == '':
             pageurl = starturl    # se c'è gia resetto le date
-        a = gL.cMySql.execute("Update Pages set Active = 1, Start = %s, End = 0 where source = %s and assettype = %s and country = %s and starturl = %s and pageurl = %s", \
+        a = gL.cMySql.execute("Update Pages set Start = %s, End = 0 where source = %s and assettype = %s and country = %s and starturl = %s and pageurl = %s", \
                                     (gL.SetNow(), source, assettype, country, starturl, pageurl))
         if a == 0:
             # inserisci il record        
-            gL.cMySql.execute("Insert into Pages(Source, AssetType, Country, StartUrl, Pageurl, RunId, Active) \
+            gL.cMySql.execute("Insert into Pages(Source, AssetType, Country, StartUrl, Pageurl, RunId) \
                             values (%s,%s,%s,%s,%s,%s,%s)", \
-                            (source, assettype, country, starturl, pageurl, gL.RunId, 1))    
+                            (source, assettype, country, starturl, pageurl, gL.RunId))    
         return True
     except Exception as err:
         gL.log(gL.ERROR, str(source)+ str(assettype) + country + starturl + pageurl)
