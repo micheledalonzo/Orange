@@ -130,7 +130,7 @@ def PagesCreate(source, assettype, country, starturl, pageurl):
         if a == 0:
             # inserisci il record        
             gL.cMySql.execute("Insert into Pages(Source, AssetType, Country, StartUrl, Pageurl, RunId) \
-                            values (%s,%s,%s,%s,%s,%s,%s)", \
+                            values (%s,%s,%s,%s,%s,%s)", \
                             (source, assettype, country, starturl, pageurl, gL.RunId))    
         return True
     except Exception as err:
