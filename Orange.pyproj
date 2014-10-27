@@ -46,6 +46,7 @@
     </WebPiReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="orange.yaml" />
     <Content Include="OrangeMaster.mdbmodel" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Python Tools\Microsoft.PythonTools.Django.targets" />
