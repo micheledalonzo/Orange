@@ -120,7 +120,7 @@ def NormalPaginate():
                 return False
             locale.setlocale(locale.LC_TIME, SetLocaleString)  
         
-            # se richiesto cancello e ricreo la coda, ma solo per le righe dipendenti dallo starturl            
+            # cancello e ricreo la coda, ma solo per le righe dipendenti dallo starturl            
             gL.cMySql.execute("Delete from queue where source = %s and AssetType = %s and Country = %s and StartUrl = %s", (source, assettype, country, starturl))           
             gL.cMySql.execute("Delete from pages where source = %s and AssetType = %s and Country = %s and StartUrl = %s", (source, assettype, country, starturl))
            
@@ -152,8 +152,6 @@ def NormalPaginate():
             rc = BuildAssetList(country, assettype, source, starturl, pageurl, gL.RunId)      # ricostruisco la coda              
             if not rc:                
                 return False    
-            # pulisci dalla coda (tabella pages) tutte le pagine che non sono state trovate
-            gL.cMySql.execute("Delete from Pages where Active = 0 where Starturl=%s", ([starturl]))
 
         return True
 
