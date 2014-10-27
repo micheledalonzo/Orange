@@ -441,12 +441,11 @@ def dbAsset(country, assettype, source, name, url, AAsset=0, GooglePid=''):
             gL.cMySql.execute( "Insert into Asset(Source, AssetType, Country, Url, Name, Created, Updated, Active, GooglePid, AAsset) \
                               Values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", \
                             ( source, assettype, country, url, name, gL.RunDate, gL.SetNow(), gL.YES, GooglePid, AAsset))
-            
-            a = gL.cMySql.lastrowid()
-            if a is None:
+           
+            Asset = gL.cMySql.lastrowid
+            if Asset is None:
                 raise Exception("Get autonum errato")
-            Asset = int(a[0])
-             
+                     
         return Asset
 
     except Exception as err:

@@ -197,7 +197,7 @@ def Main():
                 print("Nessun run da eseguire")
             else:
                 gL.RunId = gL.RunIdCreate(me)
-                rc = gL.SetLogger("PGN", gL.RunId, gL.restart)
+                rc = gL.SetLogger("PRS", gL.RunId, gL.restart)
                 if not rc:
                     print("SetLogger errato")
                 rc = gL.RunIdStatus("START")  
