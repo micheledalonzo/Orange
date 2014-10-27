@@ -233,7 +233,7 @@ def NextpageQristoranti(url, page):
         if numpa[0] is not None:
             if int(numpa[0]) > int(curpa):
                 rc, newpage = ReadPage(links[0])
-                if newpage is not None:
+                if rc == 0 and newpage is not None:
                     return(links[0], newpage)
                 else:
                     return False, ''
@@ -253,7 +253,7 @@ def ParseTripadvisor(country, url, name, Asset):
     try:
         # leggi la pagina di contenuti
         rc, content = ReadPage(url)
-        if content is None:
+        if rc != 0:
             if rc == 404:
                 gL.cMySql.execute("Update Asset set Active=%s, Updated=%s where Asset=%s", (0, gL.SetNow(), Asset))
                 return True
@@ -767,8 +767,9 @@ def ParseViamichelin(country, url, name, Asset):
     if gL.trace: gL.log(gL.DEBUG)   
         
     try:    
+        # leggi la pagina di contenuti
         rc, content = ReadPage(url)
-        if content is None:
+        if rc != 0:
             if rc == 404:
                 gL.cMySql.execute("Update Asset set Active=%s, Updated=%s where Asset=%s", (0, gL.SetNow(), Asset))
                 return True
@@ -884,7 +885,7 @@ def ParseQristoranti(country, url, name, Asset):
     try:
         # leggi la pagina di contenuti
         rc, content = ReadPage(url)
-        if content is None:
+        if rc != 0:
             if rc == 404:
                 gL.cMySql.execute("Update Asset set Active=%s, Updated=%s where Asset=%s", (0, gL.SetNow(), Asset))
                 return True

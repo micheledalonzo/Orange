@@ -33,7 +33,7 @@ def BuildAssetList(country, assettype, source, starturl, pageurl, runlogid):
                 rc, page = gL.ReadPage(pageurl)
             else:
                 page = newpage
-            if page is not None:
+            if rc == 0 and page is not None:
                 # inserisce la pagina da leggere nel runlog
                 rc = gL.PagesStatus("START", country, assettype, source, starturl, pageurl)                                
                 # legge la pagina lista, legge i link alle pagine degli asset e li inserisce nella queue
@@ -86,7 +86,7 @@ def RestartPaginate():
             gL.log(gL.INFO, msg)
 
             rc, page = gL.ReadPage(pageurl)  # rileggo l'ultima pagina con data di start massima
-            if page is not None:
+            if rc == 0 and page is not None:
                 newpageurl, newpage = gL.ParseNextPage(source, assettype, country, pageurl, page)  # leggo se esiste la prossima pagina 
                 if newpageurl:
                     # ---------------- (ri)costruisco la coda
