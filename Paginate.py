@@ -32,6 +32,7 @@ def BuildAssetList(country, assettype, source, starturl, pageurl, runlogid):
             if newpage == '':
                 rc, page = gL.ReadPage(pageurl)
             else:
+                rc = 0
                 page = newpage
             if rc == 0 and page is not None:
                 # inserisce la pagina da leggere nel runlog
@@ -60,7 +61,7 @@ def RestartPaginate():
         gL.cMySql.execute("SELECT * from QPagesRestart")   # rileggo tutti i record della tabella pages che non sono stati completati e li processo nuovamente
         check = gL.cMySql.fetchall() 
         gL.T_Ass = len(check)
-        msg=('RUN %s: RESTART PARSING, %s Assets IN QUEUE' % (gL.RunId, gL.T_Ass))                
+        msg=('RUN %s: RESTART PAGINATE, %s Assets IN QUEUE' % (gL.RunId, gL.T_Ass))                
         gL.log(gL.INFO, msg)
         for log in check:
             gL.assetbaseurl = log['DriveBaseUrl']  
@@ -106,6 +107,7 @@ def RestartPaginate():
 def NormalPaginate():
     if gL.trace: gL.log(gL.DEBUG)   
     try:    
+        gL.log(gL.ERROR, "Inserimento Starturl")
         for drive in gL.Drive:              # inserisco gli starturl nel run
             country = drive['Country']  
             source = drive['Source']
@@ -126,7 +128,6 @@ def NormalPaginate():
            
             # metto in tabella Pages tutti gli starturl che devo fare            
             rc = gL.PagesCreate(source, assettype, country, starturl, pageurl)    
-
         
         for drive in gL.Drive:     # leggo ogni record del drive e ricostruisco la coda 
             gL.assetbaseurl = drive['DriveBaseUrl']  # il baseurl per la tipologia di asset
