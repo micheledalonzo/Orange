@@ -71,7 +71,7 @@ Tst_MySqlSvr = d['tst']['MySqlSvr']
 Tst_MySqlUsr = d['tst']['MySqlUsr']
 Tst_MySqlPsw = d['tst']['MySqlPsw']
 f.close()
-   
+  
 INFO     = logging.INFO
 CRITICAL = logging.CRITICAL
 FATAL    = logging.FATAL

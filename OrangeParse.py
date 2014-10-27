@@ -148,7 +148,7 @@ def NextpageDuespaghi(url, page):
     if gL.trace: gL.log(gL.DEBUG)   
     
     try: 
-        #   DUESPAGHI - PAGINAZIONE - RICEVE UNA PAGINA, E RESTIRUISCE URL DELLA NEXT
+        #   DUESPAGHI - PAGINAZIONE - RICEVE UNA PAGINA, E RESTITUISCE URL DELLA NEXT
         o = urlparse(url)
         found = re.search('pag=(.+?)&', o.query).group(1)
         if found is not None:
@@ -157,7 +157,7 @@ def NextpageDuespaghi(url, page):
             url_a = "http://" + o.hostname + o.path + "?pag=" + str(nx) + "&ord=relevance&dir=desc"
         # controlla che esista
         rc, page = ReadPage(url_a)
-        if rc == 0 and page is None:            
+        if rc != 0 or page is None:            
             return False, ''
         test = page.xpath('//*[@class="row-identity-container"]/a/@href')  # le pagine esistono ma non hanno contenuto
         if page is not None and test:

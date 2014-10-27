@@ -15,7 +15,7 @@ def OpenDb():
             gL.MsAcc  = pypyodbc.connect(gL.Tst_MsAccDsn)
             gL.MySql  = pymysql.connect(host=gL.Tst_MySqlSvr, port=3306, user=gL.Tst_MySqlUsr, passwd=gL.Tst_MySqlPsw, db=gL.Tst_MySqlDb, use_unicode=True, charset='utf8')    
         else:
-            gL.MsAcc  = pypyodbc.connect(Prd_MsAccDsn)
+            gL.MsAcc  = pypyodbc.connect(gL.Prd_MsAccDsn)
             gL.MySql  = pymysql.connect(host=gL.Prd_MySqlSvr, port=3306, user=gL.Prd_MySqlUsr, passwd=gL.Prd_MySqlPsw, db=gL.Prd_MySqlDb, use_unicode=True, charset='utf8')
     
         gL.cMsAcc = gL.MsAcc.cursor()    
@@ -28,7 +28,8 @@ def OpenDb():
 
         return True
     
-    except Exception as err:                
+    except Exception as err:
+        print(err)
         return False
 
 

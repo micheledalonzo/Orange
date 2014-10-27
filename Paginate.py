@@ -134,7 +134,7 @@ def NormalPaginate():
             country = drive['Country']  # paese
             source = drive['Source']
             assettype = drive['AssetType']
-            sourcename = drive['sourcename']
+            sourcename = drive['SourceName']
             gL.currency = drive['CountryCurr']
             assettypename = drive['AssetTypeName']
             rundate = drive['RunDate']
