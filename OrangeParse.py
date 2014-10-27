@@ -159,8 +159,10 @@ def NextpageDuespaghi(url, page):
         rc, page = ReadPage(url_a)
         if rc != 0 or page is None:            
             return False, ''
-        test = page.xpath('//*[@class="row-identity-container"]/a/@href')  # le pagine esistono ma non hanno contenuto
-        if page is not None and test:
+        #chkstr = '//*[@class="row-identity-container"]/a/@href'
+        chkstr = '//*[@class="disabled"]//i//@class' # Element='<i class="fa fa-chevron-right" />'
+        test = page.xpath(chkstr)  # le pagine esistono ma non hanno contenuto
+        if "fa fa-chevron-right" not in test:
             return url_a, page
 
     except Exception as err:

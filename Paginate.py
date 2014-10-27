@@ -107,14 +107,14 @@ def RestartPaginate():
 def NormalPaginate():
     if gL.trace: gL.log(gL.DEBUG)   
     try:    
-        gL.log(gL.ERROR, "Inserimento Starturl")
+        gL.log(gL.INFO, "Inserimento Starturl")
         for drive in gL.Drive:              # inserisco gli starturl nel run
             country = drive['Country']  
             source = drive['Source']
             assettype = drive['AssetType']
             language = drive['CountryLanguage']     
             starturl = drive['StartUrl']     
-            pageurl = starturl        
+            pageurl = starturl            
             SetLocaleString = drive['SetLocaleString']
             # gestione della lingua per l'interpretazione delle date
             if not SetLocaleString:          
@@ -143,7 +143,7 @@ def NormalPaginate():
             starturl = drive['StartUrl']     
             pageurl = starturl            
             gL.SourceBaseUrl = drive['SourceBaseUrl']                        
-        
+
             msg=('RUN: %s SOURCE: %s ASSET: %s COUNTRY: %s STARTURL: %s' % (gL.RunId, sourcename, assettypename, country, starturl))
             gL.log(gL.INFO, msg)
                     # FASE DI PAGINAZIONE
