@@ -152,6 +152,9 @@ def NormalPaginate():
             rc = BuildAssetList(country, assettype, source, starturl, pageurl, gL.RunId)      # ricostruisco la coda              
             if not rc:                
                 return False    
+            # pulisci dalla coda (tabella pages) tutte le pagine che non sono state trovate
+            gL.cMySql.execute("Delete from Pages where Active = 0 where Starturl=%s", ([starturl]))
+
         return True
 
     except Exception as err:
@@ -216,6 +219,7 @@ def Main():
         # chiudi DB
         gL.CloseConnectionMySql()
         gL.CloseConnectionSqlite()
+        return True
 
     except Exception as err:
         gL.log(gL.ERROR, err)        
